@@ -1,0 +1,16 @@
+plaso.tsv: what plaso (the log2timeline/plaso:20260720 Docker image) reads
+from the files in tests/fixtures/plaso/ with its windefender_history parser
+(psort -o json_line), one line per detection: the file detected, the time
+(microseconds since 1970, UTC), the threat's name, the user, the process, the
+SHA-256, the container files, the web files and the other resources. Written
+from plaso's output, not from this crate.
+
+intrinsec-mplog.tsv: what Intrinsec's mplog_parser (MIT,
+https://github.com/Intrinsec/mplog_parser at commit
+c8bd1cb96fbb899bccec69f84ff11a346ab16637) reads from
+tests/fixtures/written/MPLog-20231219-093000.log (written by gen_mplog.py),
+its CSVs converted to UTF-8 and then by intrinsec_tsv.py:
+
+  python3 -m mplog_parser.main -d <dir with the log> -o out
+  for f in out/*.csv; do iconv -f UTF-16 -t UTF-8 $f > ${f%.csv}.utf8.csv; done
+  python3 -I intrinsec_tsv.py out > intrinsec-mplog.tsv

@@ -1,0 +1,33 @@
+[package]
+name = "sootmark-defender"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.80"
+description = "Microsoft Defender for forensics: its detection history files (what was detected, where, when, by which process, for which user, and the file's SHA-256) and its protection logs (MPLog: detections, programs scanned, exclusions, telemetry)."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Sootmark/defender"
+homepage = "https://sootmark.com"
+keywords = ["forensics", "dfir", "incident-response", "windows", "defender"]
+# Sources only: test fixtures stay in the repository.
+include = ["/src", "/README.md", "/LICENSE-APACHE", "/LICENSE-MIT"]
+
+[lib]
+name = "defender"
+
+[dependencies]
+common = { package = "sootmark-common", version = "0.3.7" }
+
+[dev-dependencies]
+proptest = "1"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_possible_wrap = "allow"
+cast_precision_loss = "allow"

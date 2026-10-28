@@ -1,12 +1,15 @@
 [package]
 name = "sootmark-defender"
-version = "0.2.0"
+version = "0.3.0"
+# Yamato Security's fork of the upstream crate (https://github.com/Sootmark/defender): not published
+# under the upstream name.
+publish = false
 edition = "2021"
 rust-version = "1.80"
-description = "Microsoft Defender for forensics: its detection history files (what was detected, where, when, by which process, for which user, and the file's SHA-256) and its protection logs (MPLog: detections, programs scanned, exclusions, telemetry)."
+description = "Microsoft Defender for forensics: its detection history files (the threat, its status and what was done, where it was found with hashes and times, the user, process, detection source and quarantine entry) and its protection and detection logs (MPLog, MPDetection: detections, programs scanned, exclusions, telemetry, service starts and versions)."
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/Sootmark/defender"
-homepage = "https://sootmark.com"
+repository = "https://github.com/Yamato-Security/ys-defender-history-parser"
+homepage = "https://github.com/Yamato-Security/ys-defender-history-parser"
 keywords = ["forensics", "dfir", "incident-response", "windows", "defender"]
 # Sources only: test fixtures stay in the repository.
 include = ["/src", "/README.md", "/LICENSE-APACHE", "/LICENSE-MIT"]
@@ -14,10 +17,9 @@ include = ["/src", "/README.md", "/LICENSE-APACHE", "/LICENSE-MIT"]
 [lib]
 name = "defender"
 
-[dependencies]
-common = { package = "sootmark-common", version = "0.3.7" }
-
 [dev-dependencies]
+# gzip, for the test files stored compressed.
+common = { package = "sootmark-common", version = "0.3.7" }
 proptest = "1"
 
 [lints.rust]

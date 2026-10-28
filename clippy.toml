@@ -1,2 +1,2 @@
 # Domain vocabulary that is prose, not code.
-doc-valid-idents = ["DetectionHistory", "SHA-256", ".."]
+doc-valid-idents = ["DetectionHistory", "SHA-256", "DFIRArtifactMuseum", ".."]

@@ -512,6 +512,22 @@ fn museum_entries_intrinsec_doesnt_read() {
     );
     assert_eq!(headers[0].get("MsSinceBoot"), Some("12656"));
     assert_eq!(of(&log, EntryKind::ProcessExclusion).len(), 178);
+    // Real-time protection's start: local, its numbers between left-to-right marks.
+    let rtp = of(&log, EntryKind::RtpPerf);
+    assert_eq!(rtp.len(), 46);
+    let timed: Vec<&Entry> = rtp.iter().filter(|e| e.time.is_some()).collect();
+    assert_eq!(timed.len(), 24);
+    assert!(rtp
+        .iter()
+        .filter(|e| e.time.is_none())
+        .all(|e| e.get("RTPStart") == Some("N/A")));
+    assert_eq!(
+        timed[0].get("RTPStart"),
+        Some("\u{200e}08\u{200e}-\u{200e}01\u{200e}-\u{200e}2020 11:48:58")
+    );
+    let start = timed[0].time.unwrap();
+    assert!(!start.is_utc());
+    assert_eq!(start.to_iso8601(), "2020-08-01T11:48:58");
     let config = of(&log, EntryKind::RtpConfigChange);
     assert_eq!(config.len(), 36);
     assert_eq!(config[0].get("Type"), Some("1024"));

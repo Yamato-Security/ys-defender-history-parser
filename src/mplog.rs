@@ -134,7 +134,8 @@ pub struct Entry {
     /// Its first line (1 the first).
     pub line: usize,
     /// When: the line's time, or for a block, the time it holds (a
-    /// telemetry's process creation, a scan's start).
+    /// telemetry's process creation, a scan's start, real-time protection's
+    /// start).
     pub time: Option<Time>,
     /// What it is.
     pub kind: EntryKind,
@@ -746,6 +747,11 @@ fn block_time(kind: EntryKind, fields: &Fields) -> Option<Time> {
 
 /// `12-15-2022 11:24:33` (month first, local time), as blocks write times.
 fn us_time(text: &str) -> Option<Time> {
+    // Some logs put left-to-right marks around the date's numbers.
+    let text: String = text
+        .chars()
+        .filter(|c| !matches!(c, '\u{200E}' | '\u{200F}'))
+        .collect();
     let (date, clock) = text.trim().split_once(' ')?;
     let mut date = date.split('-');
     let (month, day, year) = (date.next()?, date.next()?, date.next()?);
@@ -786,8 +792,11 @@ fn rtp_perf(lines: &[&str], at: usize, zone: &Zone) -> Option<(Entry, usize)> {
     let time = fields
         .iter()
         .find(|(l, _)| l == "RTPStart")
-        .and_then(|(_, v)| time(v))
-        .map(|stamp| zone.settle(stamp));
+        .and_then(|(_, v)| {
+            time(v)
+                .map(|stamp| zone.settle(stamp))
+                .or_else(|| us_time(v))
+        });
     let entry = Entry {
         line: at + 1,
         time,

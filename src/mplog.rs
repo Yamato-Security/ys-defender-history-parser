@@ -548,7 +548,11 @@ fn single(rest: &str) -> Option<(EntryKind, Fields)> {
     }
     if let Some(at) = rest.find("EMS scan for process: ") {
         let body = &rest[at + 22..];
-        let (process, labels) = body.split_once(' ')?;
+        // The process's name runs to its pid (a name may hold spaces).
+        let (process, labels) = match body.find(" pid: ") {
+            Some(pid) => (&body[..pid], &body[pid + 1..]),
+            None => body.split_once(' ')?,
+        };
         let mut fields = pairs(&[("Process", process)]);
         fields.extend(labelled(labels, EMS_SCAN));
         return Some((EntryKind::EmsScan, fields));
@@ -945,6 +949,23 @@ mod tests {
                 "2024-05-06T13:20:45.250Z",
                 "2024-05-06T18:00:00.000Z"
             ]
+        );
+    }
+
+    #[test]
+    fn ems_process_names_with_spaces() {
+        let (kind, fields) =
+            single("EMS scan for process: My App pid: 42, sigseq: 0x0, sendMemoryScanReport: 0")
+                .unwrap();
+        assert_eq!(kind, EntryKind::EmsScan);
+        assert_eq!(
+            fields,
+            pairs(&[
+                ("Process", "My App"),
+                ("pid", "42"),
+                ("sigseq", "0x0"),
+                ("sendMemoryScanReport", "0")
+            ])
         );
     }
 

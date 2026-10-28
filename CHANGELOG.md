@@ -50,6 +50,7 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
 - A cloud (SDN) query's path was cut at its first ` (`, so `C:\Program Files (x86)\…` was read as
   `C:\Program Files`; the device path group is now found from the end. Queries of files not hashed
   (no `(sha1=…)`) were left out; their device path is kept too (`DevicePath`).
+- An EMS scan's process name was cut at its first space; it now runs to its pid.
 
 ### Tests
 - Every value Orange Cyberdefense's wddh reads from 20 detection history files (plaso's, Orange's,

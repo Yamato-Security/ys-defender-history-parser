@@ -649,19 +649,26 @@ fn read_tracking(data: &[u8], problems: &mut Vec<String>) -> Vec<(String, Value)
     if data.is_empty() {
         return tracking;
     }
-    if let Err(why) = read_pairs(data, &mut tracking) {
-        problems.push(format!("tracking data: {why}"));
+    match read_pairs(data, &mut tracking) {
+        Ok(end) if end < data.len() => problems.push(format!(
+            "tracking data: {} bytes after the {end} it declares, not read",
+            data.len() - end
+        )),
+        Ok(_) => {}
+        Err(why) => problems.push(format!("tracking data: {why}")),
     }
     tracking
 }
 
-fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<(), String> {
+/// The pairs, read within the size the data declares (bytes past it are not evidence), and that
+/// size.
+fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<usize, String> {
     let first = u32_at(data, 0).ok_or("shorter than 4 bytes")? as usize;
     let (mut at, end) = if first == 1 {
         let header = u32_at(data, 4).ok_or("a header cut short")? as usize;
         let pairs = u32_at(data, 8).ok_or("a header cut short")? as usize;
         if pairs == 0 {
-            return Ok(());
+            return Ok(header.min(data.len()));
         }
         (header.saturating_add(4), header.saturating_add(pairs))
     } else {
@@ -670,6 +677,7 @@ fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<(), St
     if end > data.len() {
         return Err(format!("{end} bytes said, {} there", data.len()));
     }
+    let data = &data[..end];
     while at < end {
         let key_size = u32_at(data, at).ok_or("a key cut short")? as usize;
         let key = utf16(
@@ -712,7 +720,7 @@ fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<(), St
         ));
         at += size;
     }
-    Ok(())
+    Ok(end)
 }
 
 fn u32_at(data: &[u8], at: usize) -> Option<u32> {
@@ -844,6 +852,31 @@ mod tests {
         }
         assert_eq!(read_tracking(&empty, &mut problems), []);
         assert_eq!(problems, Vec::<String>::new());
+    }
+
+    #[test]
+    fn tracking_values_must_not_cross_the_declared_end() {
+        let mut pair = pair("A", 7, &sized(b"oops"));
+        let declared_end = pair.len() - 4;
+        let mut data = ((declared_end + 4) as u32).to_le_bytes().to_vec();
+        data.append(&mut pair);
+        let mut tracking = Vec::new();
+
+        assert!(read_pairs(&data, &mut tracking).is_err(), "{tracking:?}");
+        assert!(tracking.is_empty(), "{tracking:?}");
+    }
+
+    #[test]
+    fn bytes_after_the_declared_end_are_reported() {
+        let pairs = pair("A", 3, &1u32.to_le_bytes());
+        let mut data = ((pairs.len() + 4) as u32).to_le_bytes().to_vec();
+        data.extend(&pairs);
+        data.extend(pair("B", 3, &2u32.to_le_bytes()));
+        let mut problems = Vec::new();
+        let tracking = read_tracking(&data, &mut problems);
+        assert_eq!(tracking, [("A".to_owned(), Value::Integer(1))]);
+        assert_eq!(problems.len(), 1, "{problems:?}");
+        assert!(problems[0].contains("after the"), "{problems:?}");
     }
 
     #[test]

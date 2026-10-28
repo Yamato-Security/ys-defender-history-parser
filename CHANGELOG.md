@@ -26,6 +26,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   `CmdlineSha1Hash`) were read as 5 bytes, losing the rest of the resource's tracking data
   (`ParentPid`, `ParentCreationTime`, `ScanFlags`, …).
 - Empty tracking data (a resource with none, or a header saying so) was reported as damage.
+- Tracking pairs were read past the size the data declares, so a damaged value could take its
+  bytes from after it; every read now stays within that size, and bytes after it are reported.
 - Files without `Magic.Version:1.2` (Windows Server 2016's, as Orange Cyberdefense found) were
   refused: a file is recognised by its first values (a threat identifier, a GUID, a string).
 

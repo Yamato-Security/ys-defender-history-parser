@@ -351,6 +351,27 @@ fn entries_intrinsec_doesnt_read() {
 }
 
 #[test]
+fn sdn_paths_with_parentheses() {
+    let line = r"2023-12-19T09:36:34.869Z SDN:Issuing SDN query for C:\Program Files (x86)\Example\payload.exe (\Device\HarddiskVolume3\Program Files (x86)\Example\payload.exe) (sha1=1111, sha2=2222)";
+    let log = read_mplog(line.as_bytes());
+    assert_eq!(log.problems, Vec::<String>::new());
+    let [entry] = &log.entries[..] else {
+        panic!("{:?}", log.entries)
+    };
+    assert_eq!(entry.kind, EntryKind::SdnQuery);
+    assert_eq!(
+        entry.get("Path"),
+        Some(r"C:\Program Files (x86)\Example\payload.exe")
+    );
+    assert_eq!(
+        entry.get("DevicePath"),
+        Some(r"\Device\HarddiskVolume3\Program Files (x86)\Example\payload.exe")
+    );
+    assert_eq!(entry.get("Sha1"), Some("1111"));
+    assert_eq!(entry.get("Sha256"), Some("2222"));
+}
+
+#[test]
 fn other_files_have_no_entries() {
     assert_eq!(read_mplog(b"").entries, []);
     assert_eq!(read_mplog(b"just\nsome\ntext").entries, []);
@@ -546,6 +567,15 @@ fn museum_entries_intrinsec_doesnt_read() {
         .all(|c| stamp(c.time) == "2022-03-10T19:47:14.719Z"));
 
     let log = museum("server2022-apt-simulator-vm/MPLog-20231017-224350.log.gz");
+    // Cloud queries of files not hashed, one of an archive's member.
+    let queries = of(&log, EntryKind::SdnQuery);
+    assert_eq!(queries.len(), 5);
+    assert!(queries.iter().all(|q| q.get("Sha1").is_none()));
+    assert!(queries.iter().any(|q| q
+        .get("Path")
+        .is_some_and(|p| p.ends_with(r"\toolset\b.jsp->(SCRIPT0065)")
+            && q.get("DevicePath")
+                .is_some_and(|d| d.ends_with(r"\toolset\b.jsp")))));
     let excluded = of(&log, EntryKind::ProcessExclusion);
     assert_eq!(excluded.len(), 42);
     assert_eq!(

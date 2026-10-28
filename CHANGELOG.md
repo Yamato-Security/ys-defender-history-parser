@@ -47,6 +47,9 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
 - EMS scans written without `Engine:` before them were left out.
 - The real-time protection log had no time: its `RTP Start` is a local `MM-DD-YYYY` time (between
   left-to-right marks in some logs), not ISO 8601.
+- A cloud (SDN) query's path was cut at its first ` (`, so `C:\Program Files (x86)\…` was read as
+  `C:\Program Files`; the device path group is now found from the end. Queries of files not hashed
+  (no `(sha1=…)`) were left out; their device path is kept too (`DevicePath`).
 
 ### Tests
 - Every value Orange Cyberdefense's wddh reads from 20 detection history files (plaso's, Orange's,

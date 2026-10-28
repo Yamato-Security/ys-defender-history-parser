@@ -47,8 +47,8 @@ pub enum EntryKind {
     /// A file Defender found suspicious enough to stop caching its verdict
     /// (`Filter caching disabled for`): `PsExec`, scanners, remote tools.
     FilterCachingDisabled,
-    /// A file looked up in the cloud, with its hashes (`SDN:Issuing SDN
-    /// query`).
+    /// A file looked up in the cloud, with its device path and, when
+    /// hashed, its hashes (`SDN:Issuing SDN query`).
     SdnQuery,
     /// A low-fidelity detection, with a command line (`lowfi:`).
     Lowfi,
@@ -647,17 +647,71 @@ fn detection(fixed: &[(&str, &str)], body: &str) -> Fields {
     fields
 }
 
-/// `<path> (<device path>) (sha1=<hex>, sha2=<hex>)`.
+/// `<path> (<device path>)`, then `(sha1=<hex>, sha2=<hex>)` when the
+/// file was hashed.
 fn sdn_query(body: &str) -> Option<(EntryKind, Fields)> {
-    let (path, rest) = body.split_once(" (")?;
-    let mut fields = pairs(&[("Path", path)]);
-    let hashes = rest.rsplit_once("(sha1=")?.1.trim_end_matches(')');
-    for part in format!("sha1={hashes}").split(", ") {
+    let body = body.trim_end();
+    let (paths, hashes) = match body.rsplit_once(" (sha1=") {
+        Some((paths, hashes)) if hashes.ends_with(')') && !hashes.contains('(') => {
+            (paths, Some(&hashes[..hashes.len() - 1]))
+        }
+        _ => (body, None),
+    };
+    let (path, device) = last_group(paths)?;
+    let mut fields = pairs(&[("Path", path), ("DevicePath", device)]);
+    for part in hashes
+        .map(|h| format!("sha1={h}"))
+        .iter()
+        .flat_map(|h| h.split(", "))
+    {
         let (label, value) = part.split_once('=')?;
         let label = if label == "sha1" { "Sha1" } else { "Sha256" };
         fields.extend(pairs(&[(label, value)]));
     }
     Some((EntryKind::SdnQuery, fields))
+}
+
+/// `<text> (<group>)`: what is before the group ending `text`, and the group. Paths hold
+/// parentheses too (`Program Files (x86)`, `archive.zip->(member)`, a name with one alone), so of
+/// the ` (` the group may start at, the one is taken whose group starts like a path (`\`, `X:`),
+/// ends with the name the text before it ends with (an archive's `->member` aside), and has its
+/// parentheses balanced, the most of these; the first, of several as good.
+fn last_group(text: &str) -> Option<(&str, &str)> {
+    let inner = text.strip_suffix(')')?;
+    let balanced = |group: &str| {
+        let mut depth = 0usize;
+        for c in group.chars() {
+            match c {
+                '(' => depth += 1,
+                ')' => match depth.checked_sub(1) {
+                    Some(d) => depth = d,
+                    None => return false,
+                },
+                _ => {}
+            }
+        }
+        depth == 0
+    };
+    let name = |path: &str| {
+        let last = path.rsplit('\\').next().unwrap_or(path);
+        last.split("->").next().unwrap_or(last).to_ascii_lowercase()
+    };
+    let path_like = |group: &str| {
+        let b = group.as_bytes();
+        b.first() == Some(&b'\\') || (b.len() > 1 && b[0].is_ascii_alphabetic() && b[1] == b':')
+    };
+    let at = inner
+        .rmatch_indices(" (")
+        .map(|(at, _)| at)
+        .max_by_key(|&at| {
+            let (before, group) = (&inner[..at], &inner[at + 2..]);
+            (
+                path_like(group),
+                name(before) == name(group),
+                balanced(group),
+            )
+        })?;
+    Some((&inner[..at], &inner[at + 2..]))
 }
 
 /// `Label: value, Label: value…` read by the labels expected, in order: a
@@ -892,6 +946,40 @@ mod tests {
                 "2024-05-06T18:00:00.000Z"
             ]
         );
+    }
+
+    #[test]
+    fn device_paths_after_paths_with_parentheses() {
+        let read = |body: &str| sdn_query(body).unwrap().1;
+        let fields = |items: &[(&str, &str)]| pairs(items);
+        assert_eq!(
+            read(r"C:\a (x86)\b.exe (\Device\HarddiskVolume3\a (x86)\b.exe) (sha1=11, sha2=22)"),
+            fields(&[
+                ("Path", r"C:\a (x86)\b.exe"),
+                ("DevicePath", r"\Device\HarddiskVolume3\a (x86)\b.exe"),
+                ("Sha1", "11"),
+                ("Sha256", "22"),
+            ])
+        );
+        // An archive's member, and no hashes.
+        assert_eq!(
+            read(
+                r"\Device\HarddiskVolume3\t\b.jsp->(SCRIPT0065) (\Device\HarddiskVolume3\t\b.jsp)"
+            ),
+            fields(&[
+                ("Path", r"\Device\HarddiskVolume3\t\b.jsp->(SCRIPT0065)"),
+                ("DevicePath", r"\Device\HarddiskVolume3\t\b.jsp"),
+            ])
+        );
+        // A parenthesis alone in a name: the group starting like a path.
+        assert_eq!(
+            read(r"C:\x (1\b.exe (\Device\HarddiskVolume3\x (1\b.exe)"),
+            fields(&[
+                ("Path", r"C:\x (1\b.exe"),
+                ("DevicePath", r"\Device\HarddiskVolume3\x (1\b.exe"),
+            ])
+        );
+        assert_eq!(sdn_query(r"C:\no\device\path.exe"), None);
     }
 
     #[test]

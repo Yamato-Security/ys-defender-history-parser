@@ -4,15 +4,15 @@
 //!
 //! 1. the threat's identifier, the detection's, `Magic.Version:1.2` (missing from some Windows
 //!    Server 2016 files) and the threat's name;
-//! 2. five integers (the threat's severity and category, what Defender was to do about it, two
-//!    not known), the threat's status, a counted list, the number of resources;
+//! 2. five integers (the threat's severity and category, three not known), the threat's status, a
+//!    counted list, the number of resources;
 //! 3. the resources: `Magic.Version:1.2`, the type, the location, flags, the tracking data's size
 //!    and the tracking data;
 //! 4. the last status change, its error code, an integer, the quarantine entry, the execution
 //!    status;
 //! 5. six values, present only when section 2 starts with `4`;
 //! 6. the user, the detection's source, the process, the first detection, the remediation and
-//!    eleven values not known, the last of them the number of resources in section 7;
+//!    twelve values not known, the last of them the number of resources in section 7;
 //! 7. more resources, read as section 3's;
 //! 8. five values not known.
 //!
@@ -107,8 +107,6 @@ pub struct Detection {
     pub severity_id: Option<u32>,
     /// The threat's category (see [`Detection::category_name`]).
     pub category_id: Option<u32>,
-    /// What Defender was to do, as stored (see [`Detection::cleaning_action_id`]).
-    pub action: Option<u32>,
     /// The threat's status (`ThreatStatusID`, see [`Detection::threat_status_name`]).
     pub threat_status_id: Option<u32>,
     /// The counted list after the status, meaning not known (`[2, 3, 6]`, `[3, 6]`, …).
@@ -125,11 +123,10 @@ pub struct Detection {
     /// Whether the threat was running (`CurrentThreatExecutionStatusID`, see
     /// [`Detection::execution_status_name`]).
     pub execution_status_id: Option<u32>,
-    /// The action's result, as stored (see [`Detection::action_success`]).
-    pub action_result: Option<u32>,
     /// The user involved (`DomainUser`, `DOMAIN\user`).
     pub user: Option<String>,
-    /// What detected it (`DetectionSourceTypeID`, see [`Detection::source_type_name`]).
+    /// What detected it (`DetectionSourceTypeID`, see [`Detection::source_type_name`]); section
+    /// 6's fifth value (`6.4`) has held the same in every file seen.
     pub source_type_id: Option<u32>,
     /// The process involved (`ProcessName`: its path, or `Unknown`).
     pub process: Option<String>,
@@ -317,29 +314,6 @@ impl Detection {
             11 => "UAC",
             _ => return None,
         })
-    }
-
-    /// The action as WMI gives it (`CleaningActionID`): 2 (quarantine) for a stored 4, 9 (no
-    /// action) for 16, as editing a file and asking WMI showed. Other stored values aren't known.
-    #[must_use]
-    pub fn cleaning_action_id(&self) -> Option<u32> {
-        match self.action? {
-            4 => Some(2),
-            16 => Some(9),
-            _ => None,
-        }
-    }
-
-    /// Whether the action succeeded (WMI's `ActionSuccess`): a stored 2 is `true` and 3 `false`,
-    /// as editing a file and asking WMI showed; 1, seen when nothing was done, and other values
-    /// aren't known.
-    #[must_use]
-    pub fn action_success(&self) -> Option<bool> {
-        match self.action_result? {
-            2 => Some(true),
-            3 => Some(false),
-            _ => None,
-        }
     }
 }
 
@@ -576,7 +550,7 @@ impl Reader<'_> {
         self.detection.severity_id = self.integer("2.1");
         self.detection.category_id = self.integer("2.2");
         self.keep("2.3")?;
-        self.detection.action = self.integer("2.4");
+        self.keep("2.4")?;
         self.detection.threat_status_id = self.integer("2.5");
         let listed = self.count("2.6", 1)?;
         for i in 0..listed {
@@ -611,7 +585,7 @@ impl Reader<'_> {
         }
 
         // Section 6.
-        self.detection.action_result = self.integer("6.0");
+        self.keep("6.0")?;
         self.detection.user = self.text("6.1");
         self.detection.source_type_id = self.integer("6.2");
         self.detection.process = self.text("6.3");
@@ -915,14 +889,14 @@ mod tests {
         );
         assert_eq!(detection.severity_name(), Some("Severe"));
         assert_eq!(detection.category_name(), Some("VIRUS"));
-        assert_eq!(detection.cleaning_action_id(), Some(2));
         assert_eq!(detection.threat_status_name(), Some("Quarantined"));
         assert_eq!(detection.problems, ["the values end before 2.6"]);
         assert_eq!(
             detection.unknown,
             [
                 ("2.0".to_owned(), Value::Integer(0)),
-                ("2.3".to_owned(), Value::Integer(1))
+                ("2.3".to_owned(), Value::Integer(1)),
+                ("2.4".to_owned(), Value::Integer(4))
             ]
         );
     }

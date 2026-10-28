@@ -6,7 +6,7 @@ crate (Florian Amette): Microsoft Defender's on-disk evidence, for forensics, fo
 
 - **Detection history** (`ProgramData\Microsoft\Windows Defender\Scans\History\Service\DetectionHistory\<nn>\<GUID>`),
   one file per detection, kept after the event logs have rolled over: the threat (identifier, name,
-  severity, category), its status and what was done about it, every resource it was found in (files,
+  severity, category), its status, every resource it was found in (files,
   containers, downloads with their URL, processes, command lines, registry values, services, AMSI
   buffers, behaviours) with its tracking data (hashes, size, times, parent process), the user and
   process involved, what detected it, the quarantine entry, and when.
@@ -48,22 +48,20 @@ The file is a list of typed values (a size, a type, the data, padding to 8 bytes
 section as Orange Cyberdefense's analysis lays them out (its `doc.md`: sections 1 to 8, counted).
 Each value is named only where Defender's own reading of it is known: Orange edited values of a
 file and asked Defender through WMI (`MSFT_MpThreatDetection`) what it read
-(`tests/fixtures/orange/README.md`, checked by `tests/wmi.rs`), or every file's value agrees with
-the WMI property. The others are kept in `Detection::unknown` by section and position, so nothing
-read is lost.
+(`tests/fixtures/orange/README.md`, checked by `tests/wmi.rs`), and a value counts as known only
+when WMI's change can come from it alone; or every file's value agrees with the WMI property. The
+others are kept in `Detection::unknown` by section and position, so nothing read is lost.
 
 | Field | WMI's name | Known from |
 | --- | --- | --- |
 | `threat_id`, `id`, `threat_name` | ThreatID, DetectionID | WMI |
 | `severity_id` (`severity_name`) | MSFT_MpThreat SeverityID | its values, 1, 2, 4 and 5, are `MSFT_MpThreat`'s; in the public files Severe for trojans, backdoors, behaviours and viruses, High for hack tools, Moderate for a settings modifier, Low for a PUA |
 | `category_id` (`category_name`) | MSFT_MpThreat CategoryID | `Get-MpThreatCatalog`'s numbering: in all 21 public files, the category is the threat name's type (`Trojan:` 8 TROJAN, `HackTool:` 34 TOOL, `Virus:` 42 VIRUS, `Behavior:` 46 BEHAVIOR, …) |
-| `action` (`cleaning_action_id`) | CleaningActionID | WMI: a stored 4 is 2 (quarantine), 16 is 9 (no action) |
 | `threat_status_id` (`threat_status_name`) | ThreatStatusID | WMI |
 | `status_changed`, `remediation`, `initial_detection` | LastThreatStatusChangeTime, RemediationTime, InitialDetectionTime | WMI |
 | `status_error_code` | ThreatStatusErrorCode | WMI |
 | `quarantine_id` | – | DLEAPP found it naming a file of `Quarantine\Entries` (`{GUID}`) for each of the detections it made on a test machine; in the public files, set in 13 of the 14 whose status is Quarantined, zero in those Detected, Removed or RemoveFailed |
 | `execution_status_id` (`execution_status_name`) | CurrentThreatExecutionStatusID | WMI |
-| `action_result` (`action_success`) | ActionSuccess | WMI: 2 is true, 3 false; 1 when nothing was done |
 | `user`, `process` | DomainUser, ProcessName | WMI |
 | `source_type_id` (`source_type_name`) | DetectionSourceTypeID | WMI gave 3 (real-time) for the file holding 3; in the public files, 3 for files found on access, 4 (IOAV) for a download, 2 (system) for command lines; 6, 10 and 11 (IEPROTECT, AMSI, UAC) named in the order of Microsoft's Defender event documentation |
 | `resources`: `kind`, `location`, `flags`, `tracking` | Resources | WMI |
@@ -134,9 +132,13 @@ and [artefacts.help](https://artefacts.help/) for the protection logs; and
 
 ## Not yet
 
-The meaning of the values kept as unknown: section 6's second account (`6.13`, `NT
-AUTHORITY\SYSTEM` or empty) was the Remediation User of Defender's event 1117 for the detections
-DLEAPP made; the counted list of section 2 (`[2, 3, 6]`, `[3, 6]`, …) isn't known. Sections 5 and 7
+The meaning of the values kept as unknown. WMI's `CleaningActionID` and `ActionSuccess` changed in
+Orange's copies, but each time with two values edited at once: section 2's fifth value (`2.4`: 4
+in the public files quarantined, removed or failing removal, 0 in those only detected) with the status, and section
+6's first (`6.0`: 2, or 1 in those only detected) with the error code, which `ActionSuccess` may
+follow instead. Section 6's second account (`6.13`, `NT AUTHORITY\SYSTEM` or empty) was the
+Remediation User of Defender's event 1117 for the detections DLEAPP made; the counted list of
+section 2 (`[2, 3, 6]`, `[3, 6]`, …) isn't known. Sections 5 and 7
 (read as Orange describes them, but in no public file), files without
 `Magic.Version:1.2` (Orange saw them on Windows Server 2016; tested on a built file only), and the
 detection files of the newest Defender versions: a Windows 11 machine's files with

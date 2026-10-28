@@ -64,7 +64,7 @@ def lines(name, out):
     put("severity_id", flags["flag_2"])
     put("category_id", flags["flag_3"])
     put("2.3", flags["flag_4"])
-    put("action", flags["flag_5"])
+    put("2.4", flags["flag_5"])
     put("threat_status_id", STATUS.get(flags["threat_status_id"].split(".")[1]))
     put("list", ",".join(str(n) for n in flags["flag_list"]))
     resources = out["alert_details"] + out["alert_details_2"]
@@ -84,7 +84,7 @@ def lines(name, out):
     put("quarantine_id", None if set(quarantine) <= set("0-") else quarantine)
     put("execution_status_id", metadata["current_threat_execution_id"])
     details = out["metadata_2"]
-    put("action_result", details["flag_1"])
+    put("6.0", details["flag_1"])
     put("user", details["domain_user"])
     put("source_type_id", details["flag_2"])
     put("process", details["process_name"])

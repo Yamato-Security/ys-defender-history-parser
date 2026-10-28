@@ -10,13 +10,12 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
 #### Added
 - Every value of the file is read, section by section as Orange Cyberdefense's analysis lays them
   out (counted lists and resources, the optional sections 5 and 7), and named where Defender's
-  own reading of it is known: `threat_id`, `severity_id`, `category_id`, `action`,
-  `threat_status_id`, `status_error_code`, `quarantine_id`, `execution_status_id`,
-  `action_result`, `source_type_id`, `list`, and each resource's `flags`. The values whose
-  meaning isn't known are kept in `Detection::unknown` by section and position.
+  own reading of it is known: `threat_id`, `severity_id`, `category_id`, `threat_status_id`,
+  `status_error_code`, `quarantine_id`, `execution_status_id`, `source_type_id`, `list`, and each
+  resource's `flags`. The values whose meaning isn't known are kept in `Detection::unknown` by
+  section and position.
 - Names for the numbers: `severity_name`, `threat_status_name`, `execution_status_name`,
-  `source_type_name`, `cleaning_action_id` (WMI's `CleaningActionID`), `action_success` (WMI's
-  `ActionSuccess`).
+  `source_type_name`.
 - `Value`: tracking values keep their type (integer, flag, text); `Detection::tracking` returns
   one.
 - `Time`, the crate's own time (FILETIMEs, and the logs' times with or without a zone), replaces
@@ -46,6 +45,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
 
 #### Fixed
 - EMS scans written without `Engine:` before them were left out.
+- The real-time protection log had no time: its `RTP Start` is a local `MM-DD-YYYY` time (between
+  left-to-right marks in some logs), not ISO 8601.
 
 ### Tests
 - Every value Orange Cyberdefense's wddh reads from 20 detection history files (plaso's, Orange's,

@@ -1,6 +1,8 @@
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	2.0	0
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	2.3	112
+museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	2.4	4
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	4.2	0
+museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	6.0	2
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	6.10	0
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	6.11	0
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	6.12	0
@@ -15,8 +17,6 @@ museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	8.2	0
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	8.3	0
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	8.4	0
-museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	action	4
-museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	action_result	2
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	category_id	46
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	execution_status_id	3
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	id	513F108E-C674-4D19-AE23-79C9AD68A0E6
@@ -97,7 +97,9 @@ museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6
 museum/apt-simulator-vm/DetectionHistory/00/513F108E-C674-4D19-AE23-79C9AD68A0E6	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	2.0	0
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	2.3	66
+museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	2.4	4
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	4.2	0
+museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	6.0	2
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	6.10	0
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	6.11	0
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	6.12	0
@@ -112,8 +114,6 @@ museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	8.2	0
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	8.3	0
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	8.4	1
-museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	action	4
-museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	action_result	2
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	category_id	6
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	id	0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D
@@ -151,7 +151,9 @@ museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D
 museum/apt-simulator-vm/DetectionHistory/02/0F3D5CDF-677A-4AF9-BDE9-54E0ACD9900D	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	2.0	0
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	2.3	112
+museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	2.4	4
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	4.2	0
+museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	6.0	2
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	6.10	0
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	6.11	0
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	6.12	0
@@ -166,8 +168,6 @@ museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	8.2	0
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	8.3	0
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	8.4	0
-museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	action	4
-museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	action_result	2
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	category_id	46
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	execution_status_id	3
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	id	9E32E01D-CD43-43F0-8CAA-B3CDD510DE46
@@ -223,7 +223,9 @@ museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46
 museum/apt-simulator-vm/DetectionHistory/06/9E32E01D-CD43-43F0-8CAA-B3CDD510DE46	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	2.0	0
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	2.3	112
+museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	2.4	4
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	4.2	0
+museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	6.0	2
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	6.10	0
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	6.11	0
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	6.12	0
@@ -238,8 +240,6 @@ museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	8.2	0
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	8.3	0
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	8.4	1
-museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	action	4
-museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	action_result	2
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	category_id	8
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	id	954F8207-88D2-445F-8B53-5FD17757E16C
@@ -277,7 +277,9 @@ museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C
 museum/apt-simulator-vm/DetectionHistory/07/954F8207-88D2-445F-8B53-5FD17757E16C	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	2.0	0
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	2.3	112
+museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	2.4	4
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	4.2	0
+museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	6.0	2
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	6.10	0
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	6.11	1
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	6.12	0
@@ -292,8 +294,6 @@ museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	8.2	0
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	8.3	0
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	8.4	1
-museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	action	4
-museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	action_result	2
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	category_id	8
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	id	E36FC3A2-3409-4121-BA72-C495E2B33F75
@@ -330,7 +330,9 @@ museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75
 museum/apt-simulator-vm/DetectionHistory/09/E36FC3A2-3409-4121-BA72-C495E2B33F75	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	2.0	0
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	2.3	63
+museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	2.4	4
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	4.2	0
+museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	6.0	2
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	6.10	0
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	6.11	0
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	6.12	0
@@ -345,8 +347,6 @@ museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	8.2	0
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	8.3	0
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	8.4	1
-museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	action	4
-museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	action_result	2
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	category_id	34
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	execution_status_id	0
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	id	FDC89D27-9486-452A-AACC-DA003DE0327D
@@ -382,7 +382,9 @@ museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D
 museum/apt-simulator-vm/DetectionHistory/09/FDC89D27-9486-452A-AACC-DA003DE0327D	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	2.0	0
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	2.3	112
+museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	2.4	4
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	4.2	8
+museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	6.0	2
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	6.10	0
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	6.11	0
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	6.12	0
@@ -397,8 +399,6 @@ museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	8.2	0
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	8.3	0
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	8.4	1
-museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	action	4
-museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	action_result	2
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	category_id	8
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	id	7A1AAF2D-54D6-401D-B2B6-654FF236A602
@@ -436,7 +436,9 @@ museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602
 museum/apt-simulator-vm/DetectionHistory/10/7A1AAF2D-54D6-401D-B2B6-654FF236A602	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	2.0	0
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	2.3	112
+museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	2.4	4
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	4.2	0
+museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	6.0	2
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	6.10	0
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	6.11	0
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	6.12	0
@@ -451,8 +453,6 @@ museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	8.2	0
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	8.3	0
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	8.4	1
-museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	action	4
-museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	action_result	2
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	category_id	8
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	execution_status_id	0
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	id	D28F6999-A792-49B2-A426-F27CCF487969
@@ -488,7 +488,9 @@ museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969
 museum/apt-simulator-vm/DetectionHistory/11/D28F6999-A792-49B2-A426-F27CCF487969	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	2.0	0
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	2.3	63
+museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	2.4	4
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	4.2	8
+museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	6.0	2
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	6.10	0
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	6.11	0
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	6.12	0
@@ -503,8 +505,6 @@ museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	8.2	0
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	8.3	0
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	8.4	1
-museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	action	4
-museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	action_result	2
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	category_id	34
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	id	4565EB79-8AE0-4C7D-9CBD-25E244ACE78F
@@ -558,7 +558,9 @@ museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F
 museum/apt-simulator-vm/DetectionHistory/12/4565EB79-8AE0-4C7D-9CBD-25E244ACE78F	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	2.0	0
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	2.3	112
+museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	2.4	4
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	4.2	8
+museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	6.0	2
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	6.10	0
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	6.11	0
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	6.12	0
@@ -573,8 +575,6 @@ museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	8.2	0
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	8.3	0
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	8.4	1
-museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	action	4
-museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	action_result	2
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	category_id	8
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	id	DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D
@@ -612,7 +612,9 @@ museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D
 museum/apt-simulator-vm/DetectionHistory/13/DEAD4CDD-57BA-4E73-BEE0-6368EAE6D05D	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	2.0	0
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	2.3	112
+museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	2.4	4
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	4.2	0
+museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	6.0	2
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	6.10	0
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	6.11	0
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	6.12	0
@@ -627,8 +629,6 @@ museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	8.2	0
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	8.3	0
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	8.4	1
-museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	action	4
-museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	action_result	2
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	category_id	46
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	execution_status_id	0
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	id	22685A5C-1579-496A-8845-00EE5D5E3602
@@ -685,7 +685,9 @@ museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602
 museum/apt-simulator-vm/DetectionHistory/17/22685A5C-1579-496A-8845-00EE5D5E3602	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	2.0	0
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	2.3	112
+museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	2.4	4
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	4.2	8
+museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	6.0	2
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	6.10	0
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	6.11	0
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	6.12	0
@@ -700,8 +702,6 @@ museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	8.2	0
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	8.3	0
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	8.4	1
-museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	action	4
-museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	action_result	2
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	category_id	8
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	id	DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF
@@ -739,7 +739,9 @@ museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF
 museum/apt-simulator-vm/DetectionHistory/18/DC244D4E-9802-4EBB-99B0-9DCB63F4E8DF	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	2.0	0
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	2.3	69
+museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	2.4	0
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	4.2	0
+museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	6.0	1
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	6.10	0
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	6.11	0
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	6.12	0
@@ -754,8 +756,6 @@ museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	8.2	0
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	8.3	0
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	8.4	0
-museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	action	0
-museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	action_result	1
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	category_id	23
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	execution_status_id	2
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	id	5FF32066-BADC-4665-940A-0A22C83B2981
@@ -791,7 +791,9 @@ museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981
 museum/apt-simulator-vm/DetectionHistory/19/5FF32066-BADC-4665-940A-0A22C83B2981	version	Magic.Version:1.2
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	2.0	0
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	2.3	112
+museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	2.4	4
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	4.2	8
+museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	6.0	2
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	6.10	0
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	6.11	0
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	6.12	0
@@ -806,8 +808,6 @@ museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	8.2	0
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	8.3	0
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	8.4	1
-museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	action	4
-museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	action_result	2
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	category_id	8
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	execution_status_id	1
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	id	2E020CDD-FE3C-494C-905B-2943F112A836
@@ -845,7 +845,9 @@ museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836
 museum/apt-simulator-vm/DetectionHistory/20/2E020CDD-FE3C-494C-905B-2943F112A836	version	Magic.Version:1.2
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.0	0
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.3	87
+orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.4	4
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	4.2	0
+orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.0	3
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.10	0
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.11	0
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.12	0
@@ -860,8 +862,6 @@ orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.1	0
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.2	0
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.3	0
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.4	1
-orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action	4
-orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action_result	3
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	category_id	34
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	execution_status_id	5
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	id	94BBE9CF-CDEB-4885-9178-CC93FB10822D
@@ -899,7 +899,9 @@ orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	user	DESKTOP-O8964S4\Rapto
 orange/action_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	version	Magic.Version:1.2
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.0	0
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.3	87
+orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.4	4
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	4.2	0
+orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.0	2
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.10	0
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.11	0
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.12	0
@@ -914,8 +916,6 @@ orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.1	0
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.2	0
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.3	0
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.4	1
-orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action	4
-orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action_result	2
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	category_id	34
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	execution_status_id	1
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	id	94BBE9CF-CDEB-4885-9178-CC93FB10822D
@@ -953,7 +953,9 @@ orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	user	DESKTOP-O8964S4\Raptor
 orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D	version	Magic.Version:1.2
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.0	0
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.3	87
+orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.4	16
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	4.2	0
+orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.0	2
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.10	0
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.11	0
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.12	0
@@ -968,8 +970,6 @@ orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.1	0
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.2	0
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.3	0
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.4	1
-orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action	16
-orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action_result	2
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	category_id	34
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	execution_status_id	1
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	id	94BBE9CF-CDEB-4885-9178-CC93FB10822D
@@ -1006,7 +1006,9 @@ orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	user	DESKTOP-O8964S
 orange/search_threat_id/94BBE9CF-CDEB-4885-9178-CC93FB10822D	version	Magic.Version:1.2
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.0	0
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.3	87
+orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	2.4	4
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	4.2	0
+orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.0	2
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.10	0
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.11	0
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	6.12	0
@@ -1021,8 +1023,6 @@ orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.1	0
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.2	0
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.3	0
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	8.4	1
-orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action	4
-orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	action_result	2
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	category_id	34
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	execution_status_id	1
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	id	94BBE9CF-CDEB-4885-9178-CC93FB10822D
@@ -1060,7 +1060,9 @@ orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	user	DESKTOP-O8964S4\Rap
 orange/ts_modified/94BBE9CF-CDEB-4885-9178-CC93FB10822D	version	Magic.Version:1.2
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	2.0	0
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	2.3	110
+plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	2.4	4
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	4.2	0
+plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	6.0	2
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	6.10	0
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	6.11	0
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	6.12	0
@@ -1075,8 +1077,6 @@ plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	8.1	0
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	8.2	0
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	8.3	0
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	8.4	1
-plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	action	4
-plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	action_result	2
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	category_id	42
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	execution_status_id	0
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	id	6AFE33A0-19BA-4FFF-892F-B700539D7D63
@@ -1133,7 +1133,9 @@ plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	user	FRYPTOP\testuser
 plaso/6AFE33A0-19BA-4FFF-892F-B700539D7D63.gz	version	Magic.Version:1.2
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	2.0	0
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	2.3	63
+plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	2.4	0
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	4.2	0
+plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	6.0	1
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	6.10	0
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	6.11	0
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	6.12	0
@@ -1148,8 +1150,6 @@ plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	8.1	0
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	8.2	0
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	8.3	0
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	8.4	0
-plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	action	0
-plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	action_result	1
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	category_id	27
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	execution_status_id	1
 plaso/FC380697-A68D-4C94-B67F-9B6449039463.gz	id	FC380697-A68D-4C94-B67F-9B6449039463

@@ -3,6 +3,11 @@
 //! through WMI (`Get-WmiObject -Namespace root\Microsoft\Windows\Defender -Class
 //! MSFT_MpThreatDetection`, in Orange's `samples/*/note.md` and `doc.md`; see
 //! `tests/fixtures/orange/README.md`): what each named value is, shown by WMI changing with it.
+//!
+//! WMI's `CleaningActionID` (2 → 9) and `ActionSuccess` (true → false) changed too, but in copies
+//! with two values edited at once (the action with the status, section 6's first value with the
+//! error code), so which value of the file each comes from isn't known: those values are kept as
+//! unknown (`2.4`, `6.0`), and checked here as stored.
 
 use defender::Detection;
 
@@ -18,14 +23,16 @@ fn sample(folder: &str) -> Detection {
     detection
 }
 
-/// WMI's properties for a sample, the ones the file holds.
+/// WMI's properties for a sample, the ones the file holds, and the two values edited with them.
 struct Wmi {
-    action_success: bool,
-    cleaning_action_id: u32,
     execution_status_id: u32,
     status_error_code: i64,
     threat_status_id: u32,
     remediation: &'static str,
+    /// `2.4`, edited with the status (WMI's `CleaningActionID` 2 → 9).
+    stored_2_4: u64,
+    /// `6.0`, edited with the error code (WMI's `ActionSuccess` true → false).
+    stored_6_0: u64,
 }
 
 /// What every sample has: WMI's values, its times in UTC to the millisecond.
@@ -57,16 +64,15 @@ fn common(detection: &Detection) {
 fn check(folder: &str, wmi: &Wmi) {
     let detection = sample(folder);
     common(&detection);
-    assert_eq!(
-        detection.action_success(),
-        Some(wmi.action_success),
-        "{folder}"
-    );
-    assert_eq!(
-        detection.cleaning_action_id(),
-        Some(wmi.cleaning_action_id),
-        "{folder}"
-    );
+    let unknown = |key: &str| {
+        detection
+            .unknown
+            .iter()
+            .find(|(k, _)| k == key)
+            .and_then(|(_, v)| v.as_u64())
+    };
+    assert_eq!(unknown("2.4"), Some(wmi.stored_2_4), "{folder}");
+    assert_eq!(unknown("6.0"), Some(wmi.stored_6_0), "{folder}");
     assert_eq!(
         detection.execution_status_id,
         Some(wmi.execution_status_id),
@@ -90,12 +96,12 @@ fn check(folder: &str, wmi: &Wmi) {
 }
 
 const ORIGINAL: Wmi = Wmi {
-    action_success: true,
-    cleaning_action_id: 2,
     execution_status_id: 1,
     status_error_code: 0,
     threat_status_id: 3,
     remediation: "2025-01-28T16:45:06.220",
+    stored_2_4: 4,
+    stored_6_0: 2,
 };
 
 #[test]
@@ -107,25 +113,25 @@ fn original() {
 }
 
 #[test]
-fn action_success_execution_status_and_error_code() {
+fn execution_status_and_error_code() {
     check(
         "action_id",
         &Wmi {
-            action_success: false,
             execution_status_id: 5,
             status_error_code: 7,
+            stored_6_0: 3,
             ..ORIGINAL
         },
     );
 }
 
 #[test]
-fn cleaning_action_and_status() {
+fn status() {
     check(
         "search_threat_id",
         &Wmi {
-            cleaning_action_id: 9,
             threat_status_id: 18,
+            stored_2_4: 16,
             ..ORIGINAL
         },
     );

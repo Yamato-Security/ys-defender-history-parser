@@ -60,7 +60,6 @@ fn values(detection: &Detection) -> Vec<(String, String)> {
     put("threat_name", detection.threat_name.clone());
     put("severity_id", string(detection.severity_id));
     put("category_id", string(detection.category_id));
-    put("action", string(detection.action));
     put("threat_status_id", string(detection.threat_status_id));
     let list: Vec<String> = detection.list.iter().map(u32::to_string).collect();
     put("list", Some(list.join(",")));
@@ -84,7 +83,6 @@ fn values(detection: &Detection) -> Vec<(String, String)> {
     );
     put("quarantine_id", detection.quarantine_id.clone());
     put("execution_status_id", string(detection.execution_status_id));
-    put("action_result", string(detection.action_result));
     put("user", detection.user.clone());
     put("source_type_id", string(detection.source_type_id));
     put("process", detection.process.clone());

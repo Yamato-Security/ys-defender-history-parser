@@ -9,7 +9,7 @@ unmodified here:
 | --- | --- | --- |
 | `original/` | nothing (also its `tests/data/` file) | 84cf9c51ee6435e9d7814c8d9ac7477cc538b69ccafaab0d002ddbde593a437b |
 | `action_id/` | section 4's error code 0 → 7 and execution status 1 → 5, section 6's first value 2 → 3 | 2a79f6379a7b336c27140ab62d248e32a48f220ad75bb788b1d4aa23e6603302 |
-| `search_threat_id/` | section 2's action 4 → 16 and status 3 → 18 | 11737faa63372baf5c1ef561a83fc403c60c6500a0fd5113e834397e6375a8be |
+| `search_threat_id/` | section 2's fifth value 4 → 16 and status 3 → 18 | 11737faa63372baf5c1ef561a83fc403c60c6500a0fd5113e834397e6375a8be |
 | `ts_modified/` | section 6's last FILETIME | 368adfd492bacffc26a761258ac6e83704893e0747091963aedbdbc41b0ee9f0 |
 
 After each change Orange put the file back on the machine (Windows 10, Defender 4.18.24090.11) and

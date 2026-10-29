@@ -915,6 +915,9 @@ mod tests {
             time("2021-07-22T17:38:04.557-23:59"),
             time("2021-07-23T17:37:04.557Z")
         );
+        // Offsets taking a time out of 1601 to 9999.
+        assert_eq!(time("9999-12-31T23:59:59.000-23:59"), None);
+        assert_eq!(time("1601-01-01T00:00:00.000+00:01"), None);
     }
 
     /// The times of a log's estimated impact lines.

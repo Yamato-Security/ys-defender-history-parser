@@ -58,7 +58,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
 - An EMS scan's process name was cut at its first space; it now runs to its pid.
 - Malformed times were read as plausible ones: an offset out of RFC 3339's range (`+02:60` was
   taken as three hours) or a number with a sign (`+7`, which Rust's parsing accepts). Every number
-  in a time must now be digits, and offsets within 00:00 to 23:59.
+  in a time must now be digits, and offsets within 00:00 to 23:59. A time an offset takes past
+  9999 (or before 1601) isn't one either: it rendered as a five-digit year.
 
 ### Tests
 - Every value Orange Cyberdefense's wddh reads from 20 detection history files (plaso's, Orange's,

@@ -72,12 +72,15 @@ impl Time {
         })
     }
 
-    /// The same time moved by `minutes` (a UTC offset taken off).
+    /// The same time moved by `minutes` (a UTC offset taken off); `None` when that leaves
+    /// 1601 to 9999, the range every `Time` is in.
     pub(crate) fn shifted(self, minutes: i64) -> Option<Self> {
         let ticks = self
             .ticks
             .checked_add(minutes.checked_mul(60 * TICKS_PER_SECOND)?)?;
-        (ticks >= 0).then_some(Self { ticks, ..self })
+        (0..=MAX_FILETIME as i64)
+            .contains(&ticks)
+            .then_some(Self { ticks, ..self })
     }
 
     /// The same clock reading, as UTC.
@@ -220,6 +223,15 @@ mod tests {
         assert_eq!(
             local.shifted(-90).unwrap().as_utc().to_iso8601(),
             "2023-01-02T01:34:05Z"
+        );
+        // Shifted out of 1601 to 9999: not a time.
+        let last = Time::from_parts((9999, 12, 31), (23, 59, 59), 0, false, Precision::Second);
+        assert_eq!(last.unwrap().shifted(1), None);
+        let first = Time::from_parts((1601, 1, 1), (0, 0, 0), 0, false, Precision::Second);
+        assert_eq!(first.unwrap().shifted(-1), None);
+        assert_eq!(
+            Time::from_filetime(MAX_FILETIME).unwrap().shifted(0),
+            Time::from_filetime(MAX_FILETIME)
         );
     }
 }

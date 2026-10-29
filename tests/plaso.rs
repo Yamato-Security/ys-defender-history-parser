@@ -53,9 +53,10 @@ fn line(detection: &Detection) -> String {
         .collect();
     let micros = detection
         .start_time()
-        .and_then(|t| t.ticks())
-        .map(|ticks| ticks / 10)
-        .map_or_else(String::new, |m| m.to_string());
+        .map(defender::Time::unix)
+        .map_or_else(String::new, |(s, ns)| {
+            (s * 1_000_000 + i64::from(ns / 1000)).to_string()
+        });
     [
         locations(detection, &["file"], ";"),
         micros,
@@ -99,7 +100,7 @@ fn beyond_plaso() {
     let (_, eicar) = &fixtures()[0];
     assert_eq!(eicar.category_name(), Some("VIRUS"));
     assert_eq!(
-        eicar.tracking("ThreatTrackingMD5"),
+        eicar.tracking("ThreatTrackingMD5").and_then(|v| v.as_str()),
         Some("44d88612fea8a8f36de82e1278abb02f")
     );
     let (_, pua) = &fixtures()[1];

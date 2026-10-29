@@ -9,8 +9,7 @@
 
 use std::path::Path;
 
-use common::time::{Semantic, Ts};
-use defender::{is_mplog_name, read_mplog, Entry, EntryKind};
+use defender::{is_mplog_name, read_mplog, Entry, EntryKind, Time};
 
 const NAME: &str = "MPLog-20231219-093000.log";
 
@@ -24,8 +23,8 @@ fn log() -> Vec<Entry> {
 }
 
 /// A line's time as written (`2023-12-19T09:33:29.026Z`).
-fn stamp(ts: Option<Ts>) -> String {
-    let iso = ts.unwrap().to_iso8601().unwrap();
+fn stamp(ts: Option<Time>) -> String {
+    let iso = ts.unwrap().to_iso8601();
     format!("{}Z", &iso[..23])
 }
 
@@ -146,6 +145,9 @@ const MAPPINGS: &[Mapping] = &[
             ("image_path", "ImagePath"),
             ("taint_info", "Taint Info"),
             ("operations", "Operations"),
+            ("telemetry_name", "TelemetryName"),
+            ("image_path_hash", "ImagePathHash"),
+            ("target_filename", "TargetFileName"),
         ],
     ),
     (
@@ -181,6 +183,16 @@ const MAPPINGS: &[Mapping] = &[
             ("action", "Action"),
             ("resource_action_complete", "Resource action complete"),
             ("path", "Path"),
+            ("schema", "Schema"),
+            ("resource_refcount", "Resource refcount"),
+            ("result", "Result"),
+            ("finished_threat_id", "Finished threat ID"),
+            ("threat_result", "Threat result"),
+            ("threat_status_flags", "Threat status flags"),
+            (
+                "threat_effective_removalpolicy",
+                "Threat Effective RemovalPolicy",
+            ),
         ],
     ),
 ];
@@ -211,7 +223,7 @@ fn mapped(entry: &Entry) -> Option<(&'static str, Vec<(&'static str, String)>)> 
     }
     if entry.kind == EntryKind::BmTelemetry {
         // The process creation, to the microsecond.
-        let iso = entry.time.unwrap().to_iso8601().unwrap();
+        let iso = entry.time.unwrap().to_iso8601();
         columns.push(("timestamp", iso[..26].to_owned()));
     }
     Some((name, columns))
@@ -250,18 +262,23 @@ fn special(entry: &Entry) -> Option<(&'static str, Vec<(&'static str, String)>)>
     }
 }
 
-#[test]
-fn every_row_as_intrinsec_reads_it() {
-    assert!(is_mplog_name(NAME));
-    let entries = log();
-    let got: Vec<String> = entries
+/// The entries as Intrinsec's TSV rows.
+fn rows(entries: &[Entry]) -> Vec<String> {
+    entries
         .iter()
         .filter_map(intrinsec)
         .map(|(name, columns)| {
             let cells: Vec<String> = columns.iter().map(|(k, v)| format!("{k}={v}")).collect();
             format!("{name}\t{}", cells.join("\t"))
         })
-        .collect();
+        .collect()
+}
+
+#[test]
+fn every_row_as_intrinsec_reads_it() {
+    assert!(is_mplog_name(NAME));
+    let entries = log();
+    let got = rows(&entries);
     let oracle = include_str!("oracle/intrinsec-mplog.tsv");
     for row in oracle.lines() {
         assert!(got.iter().any(|g| g == row), "not read the same: {row}");
@@ -328,16 +345,124 @@ fn entries_intrinsec_doesnt_read() {
 
     // Block times are local; the telemetry's is its process's creation.
     let scan = of(EntryKind::ResourceScan).next().unwrap();
-    assert_eq!(scan.time.unwrap().semantic(), Semantic::LocalUnknownZone);
+    assert!(!scan.time.unwrap().is_utc());
     let telemetry = of(EntryKind::BmTelemetry).next().unwrap();
     assert_eq!(stamp(telemetry.time), "2023-12-19T09:32:08.803Z");
 }
 
 #[test]
+fn sdn_paths_with_parentheses() {
+    let line = r"2023-12-19T09:36:34.869Z SDN:Issuing SDN query for C:\Program Files (x86)\Example\payload.exe (\Device\HarddiskVolume3\Program Files (x86)\Example\payload.exe) (sha1=1111, sha2=2222)";
+    let log = read_mplog(line.as_bytes());
+    assert_eq!(log.problems, Vec::<String>::new());
+    let [entry] = &log.entries[..] else {
+        panic!("{:?}", log.entries)
+    };
+    assert_eq!(entry.kind, EntryKind::SdnQuery);
+    assert_eq!(
+        entry.get("Path"),
+        Some(r"C:\Program Files (x86)\Example\payload.exe")
+    );
+    assert_eq!(
+        entry.get("DevicePath"),
+        Some(r"\Device\HarddiskVolume3\Program Files (x86)\Example\payload.exe")
+    );
+    assert_eq!(entry.get("Sha1"), Some("1111"));
+    assert_eq!(entry.get("Sha256"), Some("2222"));
+}
+
+#[test]
+fn records_cut_short_are_reported_and_kept() {
+    for (text, kind, fields, problem) in [
+        (
+            "BEGIN BM telemetry\nProcessID: 42\n",
+            EntryKind::BmTelemetry,
+            1,
+            "line 1: BmTelemetry without its end (END BM telemetry), read to line 2",
+        ),
+        (
+            "BEGIN RTP Perf Log\nRTP Start: 12-15-2022 11:24:33\n",
+            EntryKind::RtpPerf,
+            1,
+            "line 1: RtpPerf without its end (END RTP Perf Log), read to line 2",
+        ),
+        (
+            "Microsoft Defender Antivirus Service Log\nStarted On 05-06-2024 06:20:45\n",
+            EntryKind::LogHeader,
+            2,
+            "line 1: LogHeader without its end (Current time:), read to line 2",
+        ),
+    ] {
+        let log = read_mplog(text.as_bytes());
+        assert_eq!(log.problems, [problem], "{text:?}");
+        let [entry] = &log.entries[..] else {
+            panic!("{text:?}: {:?}", log.entries)
+        };
+        assert_eq!(entry.kind, kind);
+        assert_eq!(entry.fields.len(), fields, "{entry:?}");
+    }
+
+    // Cut short by the next timed line, which is still read; a service log
+    // whose header is cut short has nothing saying its times are UTC.
+    let impact = "ProcessImageName: a.exe, Pid: 1, TotalTime: 1, Count: 1, MaxTime: 1, MaxTimeFile: x, EstimatedImpact: 1%";
+    let text = format!(
+        "Microsoft Defender Antivirus Service Log\nCurrent time: 05/06/2024 13:20:45.0 UTC (9 ms since boot)\n\
+         2024-05-06T13:20:46.000 {impact}\n\
+         BEGIN BM telemetry\nProcessID: 42\n\
+         2024-05-06T13:20:47.000 {impact}\n\
+         Microsoft Defender Antivirus Service Log\n\
+         2024-05-06T13:20:48.000 {impact}\n"
+    );
+    let log = read_mplog(text.as_bytes());
+    assert_eq!(
+        log.problems,
+        [
+            "line 4: BmTelemetry without its end (END BM telemetry), read to line 5",
+            "line 7: LogHeader without its end (Current time:), read to line 7",
+        ]
+    );
+    let times: Vec<String> = log
+        .entries
+        .iter()
+        .filter(|e| e.kind == EntryKind::EstimatedImpact)
+        .map(|e| e.time.unwrap().to_iso8601())
+        .collect();
+    assert_eq!(
+        times,
+        [
+            "2024-05-06T13:20:46.000Z",
+            "2024-05-06T13:20:47.000Z",
+            "2024-05-06T13:20:48.000"
+        ]
+    );
+}
+
+#[test]
+fn damaged_text_is_reported() {
+    let text = "2021-07-22T15:38:04.557Z ProcessImageName:a.exe, Pid: 1, TotalTime: 1, Count: 1, MaxTime: 1, MaxTimeFile: x, EstimatedImpact: 1%\n";
+
+    let mut utf16 = vec![0xff, 0xfe];
+    utf16.extend(text.encode_utf16().flat_map(u16::to_le_bytes));
+    utf16.push(0xff); // truncated code unit
+    let log = read_mplog(&utf16);
+    assert_eq!(log.entries.len(), 1);
+    assert_eq!(
+        log.problems,
+        ["an odd byte at the end (UTF-16 is in pairs), not read"]
+    );
+
+    let mut utf8 = text.as_bytes().to_vec();
+    utf8.push(0xff); // invalid UTF-8
+    let log = read_mplog(&utf8);
+    assert_eq!(log.entries.len(), 1);
+    assert_eq!(log.problems, ["text that isn't valid UTF-8, replaced"]);
+}
+
+#[test]
 fn other_files_have_no_entries() {
-    assert!(read_mplog(b"").entries.is_empty());
-    assert!(read_mplog(b"just\nsome\ntext").entries.is_empty());
-    assert!(read_mplog(&[0xFF, 0xFE, 0x41]).entries.is_empty());
+    assert_eq!(read_mplog(b"").entries, []);
+    assert_eq!(read_mplog(b"just\nsome\ntext").entries, []);
+    assert_eq!(read_mplog(&[0xFF, 0xFE, 0x41]).entries, []);
 }
 
 proptest::proptest! {
@@ -367,4 +492,185 @@ proptest::proptest! {
         let text: Vec<String> = lines.iter().map(|parts| parts.concat()).collect();
         let _ = read_mplog(text.join("\r\n").as_bytes());
     }
+}
+
+/// A DFIRArtifactMuseum log (`tests/fixtures/museum/`, gzip-compressed).
+fn museum(name: &str) -> defender::MpLog {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/museum")
+        .join(name);
+    let mut data = Vec::new();
+    std::io::Read::read_to_end(
+        &mut common::gzip::Decoder::new(&std::fs::read(path).unwrap()[..]),
+        &mut data,
+    )
+    .unwrap();
+    let log = read_mplog(&data);
+    assert_eq!(log.problems, Vec::<String>::new(), "{name}");
+    log
+}
+
+/// Rows Intrinsec would have but doesn't read, by its CSV: `DETECTION_ADD#1` lines (it reads
+/// `DETECTION_ADD` and `#2` alone), EMS scans written without `source:`, unsuccessful scans whose
+/// process is empty.
+const MUSEUM: &[(&str, &[(&str, usize)])] = &[
+    (
+        "apt-simulator-vm/Support/MPLog-20220310-113238.log.gz",
+        &[("DetectionAdd", 18)],
+    ),
+    (
+        "belkasoft-ctf/MPLog-20200801-144809.log.gz",
+        &[("Ems", 44), ("UnsuccessfulScanStatus", 10)],
+    ),
+    (
+        "server2022-apt-simulator-vm/MPLog-20231017-224350.log.gz",
+        &[("DetectionAdd", 4)],
+    ),
+];
+
+#[test]
+fn museum_logs_as_intrinsec_reads_them() {
+    let oracle = include_str!("oracle/intrinsec-museum.tsv");
+    for &(name, extra) in MUSEUM {
+        let got = rows(&museum(name).entries);
+        // Intrinsec keeps the full stop after a mini-filter line's path in the path.
+        let expected: Vec<String> = oracle
+            .lines()
+            .filter_map(|line| line.strip_prefix(&format!("museum/{name}\t")))
+            .map(|row| {
+                let cells: Vec<&str> = row.split('\t').collect();
+                let mini_filter = ["BlockedFile", "UnsuccessfulScanStatus"].contains(&cells[0]);
+                let even = |cell: &&str| match cell.strip_prefix("full_path=") {
+                    Some(path) if mini_filter => {
+                        format!("full_path={}", path.trim_end_matches('.'))
+                    }
+                    _ => (*cell).to_owned(),
+                };
+                cells.iter().map(even).collect::<Vec<_>>().join("\t")
+            })
+            .collect();
+        assert!(!expected.is_empty(), "{name}");
+        for row in &expected {
+            assert!(got.contains(row), "{name}: not read the same: {row}");
+        }
+        let mut more: Vec<(&str, usize)> = Vec::new();
+        for row in got.iter().filter(|g| !expected.contains(g)) {
+            let csv = row.split('\t').next().unwrap();
+            match more.iter_mut().find(|(c, _)| *c == csv) {
+                Some((_, n)) => *n += 1,
+                None => more.push((csv, 1)),
+            }
+        }
+        more.sort_unstable();
+        assert_eq!(more, extra, "{name}");
+    }
+}
+
+#[test]
+fn museum_entries_intrinsec_doesnt_read() {
+    let detection = museum("belkasoft-ctf/MPDetection-20210213-115635.log.gz");
+    let of = |log: &defender::MpLog, kind: EntryKind| {
+        log.entries
+            .iter()
+            .filter(|e| e.kind == kind)
+            .cloned()
+            .collect::<Vec<Entry>>()
+    };
+    let started = of(&detection, EntryKind::ServiceStarted);
+    assert_eq!(started.len(), 8);
+    assert_eq!(
+        started[0].get("Product"),
+        Some("Windows Defender Antivirus")
+    );
+    assert_eq!(
+        started[0].get("Id"),
+        Some("77BDAF73-B396-481F-9042-AD358843EC24")
+    );
+    assert_eq!(stamp(started[0].time), "2021-02-13T19:56:35.990Z");
+    let stopped = of(&detection, EntryKind::ServiceStopped);
+    assert_eq!(stopped.len(), 2);
+    assert_eq!(stopped[0].get("ExitCode"), Some("0x0"));
+    let versions = of(&detection, EntryKind::Version);
+    assert_eq!(versions.len(), 8);
+    assert_eq!(
+        versions[0].fields,
+        [
+            ("Product", "4.18.1807.18075"),
+            ("Service", "4.18.1807.18075"),
+            ("Engine", "1.1.17700.4"),
+            ("AS", "1.329.3292.0"),
+            ("AV", "1.329.3292.0"),
+        ]
+        .map(|(l, v)| (l.to_owned(), v.to_owned()))
+    );
+
+    // The service log's headers: a local start time, UTC times, the time since boot.
+    let log = museum("belkasoft-ctf/MPLog-20200801-144809.log.gz");
+    let headers = of(&log, EntryKind::LogHeader);
+    assert_eq!(headers.len(), 23);
+    assert_eq!(headers[0].line, 3);
+    assert_eq!(
+        headers[0].time.unwrap().to_iso8601(),
+        "2020-08-01T21:48:49.7178959Z"
+    );
+    assert_eq!(headers[0].get("StartedOn"), Some("08-01-2020 14:48:49"));
+    assert_eq!(
+        headers[0].get("OsInstallTime"),
+        Some("2020-08-01T21:48:28.000Z")
+    );
+    assert_eq!(headers[0].get("MsSinceBoot"), Some("12656"));
+    assert_eq!(of(&log, EntryKind::ProcessExclusion).len(), 178);
+    // Real-time protection's start: local, its numbers between left-to-right marks.
+    let rtp = of(&log, EntryKind::RtpPerf);
+    assert_eq!(rtp.len(), 46);
+    let timed: Vec<&Entry> = rtp.iter().filter(|e| e.time.is_some()).collect();
+    assert_eq!(timed.len(), 24);
+    assert!(rtp
+        .iter()
+        .filter(|e| e.time.is_none())
+        .all(|e| e.get("RTPStart") == Some("N/A")));
+    assert_eq!(
+        timed[0].get("RTPStart"),
+        Some("\u{200e}08\u{200e}-\u{200e}01\u{200e}-\u{200e}2020 11:48:58")
+    );
+    let start = timed[0].time.unwrap();
+    assert!(!start.is_utc());
+    assert_eq!(start.to_iso8601(), "2020-08-01T11:48:58");
+    let config = of(&log, EntryKind::RtpConfigChange);
+    assert_eq!(config.len(), 36);
+    assert_eq!(config[0].get("Type"), Some("1024"));
+
+    // A process scan's counts: untimed lines, given the scan's start.
+    let log = museum("apt-simulator-vm/Support/MPLog-20220310-113238.log.gz");
+    let counts = of(&log, EntryKind::ProcessCounts);
+    assert_eq!(counts.len(), 10);
+    assert_eq!(counts[0].get("ProcessImageName"), Some("vmtoolsd.exe"));
+    assert_eq!(
+        counts[0].get("MaxTimeFile"),
+        Some(r"\Device\HarddiskVolume3\Windows\System32\vcruntime140.dll")
+    );
+    assert!(counts
+        .iter()
+        .all(|c| stamp(c.time) == "2022-03-10T19:47:14.719Z"));
+
+    let log = museum("server2022-apt-simulator-vm/MPLog-20231017-224350.log.gz");
+    // Cloud queries of files not hashed, one of an archive's member.
+    let queries = of(&log, EntryKind::SdnQuery);
+    assert_eq!(queries.len(), 5);
+    assert!(queries.iter().all(|q| q.get("Sha1").is_none()));
+    assert!(queries.iter().any(|q| q
+        .get("Path")
+        .is_some_and(|p| p.ends_with(r"\toolset\b.jsp->(SCRIPT0065)")
+            && q.get("DevicePath")
+                .is_some_and(|d| d.ends_with(r"\toolset\b.jsp")))));
+    let excluded = of(&log, EntryKind::ProcessExclusion);
+    assert_eq!(excluded.len(), 42);
+    assert_eq!(
+        excluded[0].get("DevicePath"),
+        Some(r"\Device\HarddiskVolume3\Program Files\Windows Defender\MpCmdRun.exe")
+    );
+
+    // The detection log of a service that never wrote one: its byte order mark alone.
+    let empty = museum("apt-simulator-vm/Support/MPDetection-20220310-113238.log.gz");
+    assert_eq!(empty.entries, []);
 }

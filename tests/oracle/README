@@ -14,3 +14,17 @@ its CSVs converted to UTF-8 and then by intrinsec_tsv.py:
   python3 -m mplog_parser.main -d <dir with the log> -o out
   for f in out/*.csv; do iconv -f UTF-16 -t UTF-8 $f > ${f%.csv}.utf8.csv; done
   python3 -I intrinsec_tsv.py out > intrinsec-mplog.tsv
+
+intrinsec-museum.tsv: the same, run on each DFIRArtifactMuseum protection log
+(tests/fixtures/museum/, decompressed, one log per directory), each row
+prefixed with the log's path under tests/fixtures/ and a tab.
+
+wddh.tsv: what Orange Cyberdefense's wddh (Apache-2.0,
+https://github.com/cert-orangecyberdefense/wddh-parser, version 1.0.1 at commit
+0d7ff1efcb21f722f3465cc0a4916d5ab4b5fde2) reads from every detection history
+file in tests/fixtures/ (plaso's decompressed first), one line per value: the
+file, a key named as this crate names the value (a section and position for
+the values whose meaning isn't known), the value. Written by wddh_tsv.py,
+which runs the wddh command:
+
+  python3 -I wddh_tsv.py ../fixtures > wddh.tsv

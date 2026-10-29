@@ -72,6 +72,16 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   in a time must now be digits, and offsets within 00:00 to 23:59. A time an offset takes past
   9999 (or before 1601) isn't one either: it rendered as a five-digit year.
 
+### Quarantine
+
+#### Added
+- The quarantine (`quarantine` module): entries (`read_entry`: the threat, scan and time, and every
+  resource with its fields), resource records (`read_resource_record`: the content's size and the
+  entries holding it) and contents (`read_resource_data`: decrypted, a file's `BackupRead`
+  streams or a registry hive; `owner`, `zone_identifier`, `file_data`), with `crypt` (RC4 with
+  Defender's key), `detect` and `hashes`. Sizes, CRCs and the content's SHA-1 are checked.
+- `sootmark-common` is a dependency again, for CRC-32, MD5, SHA-1 and SHA-256.
+
 ### Tests
 - Every value Orange Cyberdefense's wddh reads from 20 detection history files (plaso's, Orange's,
   DFIRArtifactMuseum's) read the same; Orange's four files read as Defender itself read them

@@ -26,10 +26,15 @@
 //! (`Support\MPDetection-*.log`): detections, programs scanned, exclusions, blocked files,
 //! behaviour monitoring telemetry, the service's starts and versions.
 //!
+//! [`quarantine`] reads the quarantine (`Quarantine\Entries`, `ResourceData`, `Resources`): what
+//! was quarantined, for which threat and when, and the quarantined content, decrypted, with its
+//! streams, owner and download origin.
+//!
 //! Damage is reported in `problems`, never a panic.
 
 mod history;
 mod mplog;
+pub mod quarantine;
 mod time;
 
 pub use history::{detect, read, Detection, Error, Resource, Value};

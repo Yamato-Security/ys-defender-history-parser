@@ -13,10 +13,17 @@ crate (Florian Amette): Microsoft Defender's on-disk evidence, for forensics, fo
 - **Protection logs** (`Support\MPLog-*.log`) and **detection logs** (`Support\MPDetection-*.log`):
   detections, programs scanned and how long they took, exclusions, blocked and unscanned files,
   behaviour monitoring telemetry, memory scans, the service's starts, stops and versions.
+- **Quarantine** (`Quarantine\Entries\{GUID}`, `ResourceData\<xx>\<ID>`, `Resources\<xx>\<ID>`,
+  new in the fork): each quarantine's threat, scan and time, every resource quarantined (files
+  with their path, size, times and attributes; registry keys; services; startup items; scheduled
+  tasks), and the quarantined content, decrypted: a file's data, security descriptor (its owner)
+  and alternate data streams (`Zone.Identifier`: where it was downloaded from), or a registry
+  hive. Nothing is ever run.
 
 Upstream's history is kept, with its MIT OR Apache-2.0 license. The crate keeps its name,
 `sootmark-defender`, and its library name, `defender`; it is not published, and its versions from
-0.3.0 are the fork's own. No dependencies.
+0.3.0 are the fork's own. One dependency, Sootmark's `sootmark-common` (CRC-32, MD5, SHA-1,
+SHA-256).
 
 ## Why this crate
 
@@ -115,8 +122,38 @@ defender = { package = "sootmark-defender", git = "https://github.com/Yamato-Sec
 - plaso's reading of its 2 files (upstream's `tests/plaso.rs`).
 - Every row Intrinsec's parser reads from DFIRArtifactMuseum's three MPLogs and from a log written
   in every shape documented (`tests/mplog.rs`), and the entries it doesn't read, by value.
+- A quarantine folder written as Defender writes them (`tests/oracle/gen_quarantine.py`: a file
+  with its streams, a service with its hive, a startup item, a content no entry holds; made-up
+  names, a line of text for the file), read the same by dissect.target's quarantine reader, and
+  read whole and damaged (`tests/quarantine.rs`).
 - Damage gives problems, never a panic: property tests, and 3.6 million mutated copies of the 18
   detection history files (bytes overwritten, files cut, sizes and types changed).
+
+## The quarantine
+
+Every part is RC4-encrypted with the key Defender holds (`quarantine::crypt`; published by
+cuckoo-modified's `quarantine.py`, used by every reader since). An entry and a resource record are
+a 60-byte header (magic numbers `DB E8 C5 01` and `DB E8 C5 02`, the sizes of two sections and
+their CRC-32s, stored without the CRC's final inversion) and the two sections, each encrypted on
+its own:
+
+- an entry's first section holds its identifier (also its file's name, and the detection
+  history's `quarantine_id`), the scan's, the time, the threat's identifier and name; its second,
+  the resources at the offsets it lists: a path, a type, and fields 4-byte aligned, each an
+  identifier, a type and a value (named as dissect.target names a file's: `FileSize`,
+  `CreationTime`, `LastAccessTime`, `LastWriteTime`, `Flags`, `PhysicalPath`,
+  `DetectionContext`; the field of type 4 is the content's identifier, whatever the resource);
+- a resource record's first section holds the content's size and identifier and a count, its
+  second the entries holding the content;
+- a content (`ResourceData`) is a file's `BackupRead` streams, or a registry hive (a registry key's
+  or a service's), and its identifier is the SHA-1 of it decrypted.
+
+The sizes and both CRCs are checked: a part cut short, changed or damaged is reported.
+`read_resource_data` computes the content's SHA-1 as its `id`, to compare with the `ResourceData`
+file's name, and keeps the content in memory to read it. `file_data` is what was quarantined for an
+ordinary file. A sparse file is reconstructed from its allocated blocks with
+`reconstruct_sparse_file` and the `FileSize` in its entry, preserving zero regions. `hashes` gives
+the recovered file's MD5, SHA-1 and SHA-256 (as the detection history's tracking data does).
 
 ## Credits
 

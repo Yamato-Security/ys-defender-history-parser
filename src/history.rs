@@ -795,17 +795,17 @@ fn read_pairs(
     }
 }
 
-fn u32_at(data: &[u8], at: usize) -> Option<u32> {
+pub(crate) fn u32_at(data: &[u8], at: usize) -> Option<u32> {
     Some(u32::from_le_bytes(data.get(at..at + 4)?.try_into().ok()?))
 }
 
-fn u64_at(data: &[u8], at: usize) -> Option<u64> {
+pub(crate) fn u64_at(data: &[u8], at: usize) -> Option<u64> {
     Some(u64::from_le_bytes(data.get(at..at + 8)?.try_into().ok()?))
 }
 
 /// UTF-16LE text up to its first NUL, and what was damaged: an odd byte at its end, text after
 /// its NUL, or text that isn't UTF-16 (replaced).
-fn utf16(bytes: &[u8]) -> (String, Option<&'static str>) {
+pub(crate) fn utf16(bytes: &[u8]) -> (String, Option<&'static str>) {
     let pairs = bytes.chunks_exact(2);
     let odd = !pairs.remainder().is_empty();
     let units: Vec<u16> = pairs.map(|p| u16::from_le_bytes([p[0], p[1]])).collect();
@@ -826,7 +826,7 @@ fn utf16(bytes: &[u8]) -> (String, Option<&'static str>) {
 
 /// An ASCII string (read as UTF-8) up to its first NUL, and what was damaged: text after its
 /// NUL, or text that isn't UTF-8 (replaced).
-fn ascii(bytes: &[u8]) -> (String, Option<&'static str>) {
+pub(crate) fn ascii(bytes: &[u8]) -> (String, Option<&'static str>) {
     let end = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
     let text = String::from_utf8_lossy(&bytes[..end]);
     let damage = if bytes[end..].iter().any(|&b| b != 0) {
@@ -839,7 +839,7 @@ fn ascii(bytes: &[u8]) -> (String, Option<&'static str>) {
     (text.into_owned(), damage)
 }
 
-fn hex(bytes: &[u8]) -> String {
+pub(crate) fn hex(bytes: &[u8]) -> String {
     use fmt::Write;
     bytes.iter().fold(String::new(), |mut text, b| {
         let _ = write!(text, "{b:02x}");
@@ -848,7 +848,7 @@ fn hex(bytes: &[u8]) -> String {
 }
 
 /// A GUID as Windows writes it, upper case.
-fn guid(bytes: &[u8]) -> String {
+pub(crate) fn guid(bytes: &[u8]) -> String {
     let data1 = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
     let data2 = u16::from_le_bytes([bytes[4], bytes[5]]);
     let data3 = u16::from_le_bytes([bytes[6], bytes[7]]);

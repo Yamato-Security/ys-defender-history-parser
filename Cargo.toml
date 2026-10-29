@@ -17,9 +17,12 @@ include = ["/src", "/README.md", "/LICENSE-APACHE", "/LICENSE-MIT"]
 [lib]
 name = "defender"
 
-[dev-dependencies]
-# gzip, for the test files stored compressed.
+[dependencies]
+# CRC-32, MD5, SHA-1 and SHA-256, for the quarantine; and gzip, for the test files stored
+# compressed.
 common = { package = "sootmark-common", version = "0.3.7" }
+
+[dev-dependencies]
 proptest = "1"
 
 [lints.rust]

@@ -28,3 +28,13 @@ the values whose meaning isn't known), the value. Written by wddh_tsv.py,
 which runs the wddh command:
 
   python3 -I wddh_tsv.py ../fixtures > wddh.tsv
+
+tests/fixtures/written/Quarantine/: written by gen_quarantine.py, a quarantine
+folder as Defender writes them (made-up names, a line of text for the file).
+dissect.target's quarantine reader (dissect/target/plugins/os/windows/defender/
+quarantine.py at commit b983c57245d9e5c09822a59ebe29f0311827205d, AGPL-3.0, only
+run) reads the same threat, scan, time, resource types, paths, resource
+identifiers, sizes, times and streams from it; it gives no identifier for the
+service's content and can't read the hive, which tests/quarantine.rs reads.
+
+  python3 -I gen_quarantine.py ../fixtures/written

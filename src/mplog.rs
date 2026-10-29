@@ -381,13 +381,23 @@ fn time(stamp: &str) -> Option<Stamp> {
             _ => 0,
         };
         if sign != 0 && offset.as_bytes()[3] == b':' {
-            let hours: i64 = offset[1..3].parse().ok()?;
-            let minutes: i64 = offset[4..].parse().ok()?;
+            // RFC 3339's range: hours 00 to 23, minutes 00 to 59.
+            let hours: i64 = number(&offset[1..3]).filter(|h| *h <= 23)?;
+            let minutes: i64 = number(&offset[4..]).filter(|m| *m <= 59)?;
             let shifted = clock(local)?.shifted(-sign * (hours * 60 + minutes))?;
             return Some(Stamp::Utc(shifted.as_utc()));
         }
     }
     Some(Stamp::Unzoned(clock(stamp)?))
+}
+
+/// A number written in digits only: Rust's parsing also takes a sign (`+1`), which no time
+/// written here holds.
+fn number<T: std::str::FromStr>(text: &str) -> Option<T> {
+    if text.is_empty() || !text.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    text.parse().ok()
 }
 
 /// `YYYY-MM-DDTHH:MM:SS[.fraction]`, its zone not known.
@@ -398,7 +408,7 @@ fn clock(text: &str) -> Option<Time> {
     if date.next().is_some() {
         return None;
     }
-    let date = (year.parse().ok()?, month.parse().ok()?, day.parse().ok()?);
+    let date = (number(year)?, number(month)?, number(day)?);
     calendar(date, clock)
 }
 
@@ -417,11 +427,7 @@ fn calendar(date: (i64, u32, u32), clock: &str) -> Option<Time> {
         1..=3 => Precision::Millisecond,
         _ => Precision::Tick,
     };
-    let clock = (
-        hour.parse().ok()?,
-        minute.parse().ok()?,
-        second.parse().ok()?,
-    );
+    let clock = (number(hour)?, number(minute)?, number(second)?);
     Time::from_parts(date, clock, ticks, false, precision)
 }
 
@@ -434,7 +440,7 @@ fn header_time(text: &str) -> Option<Time> {
         .or_else(|| rest.split_once(" UTC ").map(|(c, _)| c))?;
     let mut date = date.split('/');
     let (month, day, year) = (date.next()?, date.next()?, date.next()?);
-    let date = (year.parse().ok()?, month.parse().ok()?, day.parse().ok()?);
+    let date = (number(year)?, number(month)?, number(day)?);
     Some(calendar(date, clock)?.as_utc())
 }
 
@@ -795,7 +801,7 @@ fn block_time(kind: EntryKind, fields: &Fields) -> Option<Time> {
     };
     match kind {
         EntryKind::BmTelemetry => get("ProcessCreationTime")
-            .and_then(|v| v.parse::<u64>().ok())
+            .and_then(number::<u64>)
             .and_then(Time::from_filetime),
         EntryKind::ResourceScan => get("Start Time").and_then(us_time),
         EntryKind::ThreatAction => get("Start time").and_then(us_time),
@@ -813,7 +819,7 @@ fn us_time(text: &str) -> Option<Time> {
     let (date, clock) = text.trim().split_once(' ')?;
     let mut date = date.split('-');
     let (month, day, year) = (date.next()?, date.next()?, date.next()?);
-    let date = (year.parse().ok()?, month.parse().ok()?, day.parse().ok()?);
+    let date = (number(year)?, number(month)?, number(day)?);
     calendar(date, clock)
 }
 
@@ -897,6 +903,18 @@ mod tests {
         ));
         assert_eq!(time("2021-07-22T15:38:04.557+0200"), None);
         assert_eq!(time("2021-02-30T15:38:04.557Z"), None);
+        // Offsets out of RFC 3339's range, and signed numbers, aren't times.
+        assert_eq!(time("2021-07-22T17:38:04.557+02:60"), None);
+        assert_eq!(time("2021-07-22T17:38:04.557+24:00"), None);
+        assert_eq!(time("2021-07-22T17:38:04.557+-1:00"), None);
+        assert_eq!(time("2021-07-22T17:38:04.557-0+:00"), None);
+        assert_eq!(time("2021-07-22T+7:38:04.557Z"), None);
+        assert_eq!(time("+021-07-22T17:38:04.557Z"), None);
+        assert_eq!(us_time("+7-22-2021 17:38:04"), None);
+        assert_eq!(
+            time("2021-07-22T17:38:04.557-23:59"),
+            time("2021-07-23T17:37:04.557Z")
+        );
     }
 
     /// The times of a log's estimated impact lines.

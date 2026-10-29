@@ -56,6 +56,9 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   `C:\Program Files`; the device path group is now found from the end. Queries of files not hashed
   (no `(sha1=…)`) were left out; their device path is kept too (`DevicePath`).
 - An EMS scan's process name was cut at its first space; it now runs to its pid.
+- Malformed times were read as plausible ones: an offset out of RFC 3339's range (`+02:60` was
+  taken as three hours) or a number with a sign (`+7`, which Rust's parsing accepts). Every number
+  in a time must now be digits, and offsets within 00:00 to 23:59.
 
 ### Tests
 - Every value Orange Cyberdefense's wddh reads from 20 detection history files (plaso's, Orange's,

@@ -20,10 +20,11 @@ crate (Florian Amette): Microsoft Defender's on-disk evidence, for forensics, fo
   and alternate data streams (`Zone.Identifier`: where it was downloaded from), or a registry
   hive. Nothing is ever run.
 
-Upstream's history is kept, with its MIT OR Apache-2.0 license. The crate keeps its name,
-`sootmark-defender`, and its library name, `defender`; it is not published, and its versions from
-0.3.0 are the fork's own. One dependency, Sootmark's `sootmark-common` (CRC-32, MD5, SHA-1,
-SHA-256).
+Upstream's history is kept, with its MIT OR Apache-2.0 license. The crate is named after the
+repository, `ys-defender-history-parser` (upstream's was `sootmark-defender`), and keeps its library
+name, `defender`. It is version 1.0.0, by Florian Amette and Zach Mathis (@yamatosecurity), on
+Rust's 2024 edition, requires Rust 1.99, and is not published. One dependency, Sootmark's
+`sootmark-common` (CRC-32, MD5, SHA-1, SHA-256).
 
 ## Why this crate
 
@@ -110,7 +111,7 @@ for entry in &log.entries {
 Use it from Cargo by commit:
 
 ```toml
-defender = { package = "sootmark-defender", git = "https://github.com/Yamato-Security/ys-defender-history-parser", rev = "<commit>" }
+defender = { package = "ys-defender-history-parser", git = "https://github.com/Yamato-Security/ys-defender-history-parser", rev = "<commit>" }
 ```
 
 ## How it's checked

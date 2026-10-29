@@ -806,9 +806,9 @@ pub(crate) fn u64_at(data: &[u8], at: usize) -> Option<u64> {
 /// UTF-16LE text up to its first NUL, and what was damaged: an odd byte at its end, text after
 /// its NUL, or text that isn't UTF-16 (replaced).
 pub(crate) fn utf16(bytes: &[u8]) -> (String, Option<&'static str>) {
-    let pairs = bytes.chunks_exact(2);
-    let odd = !pairs.remainder().is_empty();
-    let units: Vec<u16> = pairs.map(|p| u16::from_le_bytes([p[0], p[1]])).collect();
+    let (pairs, rest) = bytes.as_chunks::<2>();
+    let odd = !rest.is_empty();
+    let units: Vec<u16> = pairs.iter().map(|&p| u16::from_le_bytes(p)).collect();
     let end = units.iter().position(|&u| u == 0).unwrap_or(units.len());
     let text = String::from_utf16(&units[..end]);
     let damage = if odd {

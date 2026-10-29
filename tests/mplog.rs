@@ -9,7 +9,7 @@
 
 use std::path::Path;
 
-use defender::{is_mplog_name, read_mplog, Entry, EntryKind, Time};
+use defender::{Entry, EntryKind, Time, is_mplog_name, read_mplog};
 
 const NAME: &str = "MPLog-20231219-093000.log";
 
@@ -625,10 +625,11 @@ fn museum_entries_intrinsec_doesnt_read() {
     assert_eq!(rtp.len(), 46);
     let timed: Vec<&Entry> = rtp.iter().filter(|e| e.time.is_some()).collect();
     assert_eq!(timed.len(), 24);
-    assert!(rtp
-        .iter()
-        .filter(|e| e.time.is_none())
-        .all(|e| e.get("RTPStart") == Some("N/A")));
+    assert!(
+        rtp.iter()
+            .filter(|e| e.time.is_none())
+            .all(|e| e.get("RTPStart") == Some("N/A"))
+    );
     assert_eq!(
         timed[0].get("RTPStart"),
         Some("\u{200e}08\u{200e}-\u{200e}01\u{200e}-\u{200e}2020 11:48:58")
@@ -649,20 +650,22 @@ fn museum_entries_intrinsec_doesnt_read() {
         counts[0].get("MaxTimeFile"),
         Some(r"\Device\HarddiskVolume3\Windows\System32\vcruntime140.dll")
     );
-    assert!(counts
-        .iter()
-        .all(|c| stamp(c.time) == "2022-03-10T19:47:14.719Z"));
+    assert!(
+        counts
+            .iter()
+            .all(|c| stamp(c.time) == "2022-03-10T19:47:14.719Z")
+    );
 
     let log = museum("server2022-apt-simulator-vm/MPLog-20231017-224350.log.gz");
     // Cloud queries of files not hashed, one of an archive's member.
     let queries = of(&log, EntryKind::SdnQuery);
     assert_eq!(queries.len(), 5);
     assert!(queries.iter().all(|q| q.get("Sha1").is_none()));
-    assert!(queries.iter().any(|q| q
-        .get("Path")
-        .is_some_and(|p| p.ends_with(r"\toolset\b.jsp->(SCRIPT0065)")
+    assert!(queries.iter().any(|q| q.get("Path").is_some_and(|p| {
+        p.ends_with(r"\toolset\b.jsp->(SCRIPT0065)")
             && q.get("DevicePath")
-                .is_some_and(|d| d.ends_with(r"\toolset\b.jsp")))));
+                .is_some_and(|d| d.ends_with(r"\toolset\b.jsp"))
+    })));
     let excluded = of(&log, EntryKind::ProcessExclusion);
     assert_eq!(excluded.len(), 42);
     assert_eq!(

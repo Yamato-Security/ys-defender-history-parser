@@ -37,8 +37,8 @@ mod mplog;
 pub mod quarantine;
 mod time;
 
-pub use history::{detect, read, Detection, Error, Resource, Value};
-pub use mplog::{is_mplog_name, read_mplog, Entry, EntryKind, MpLog};
+pub use history::{Detection, Error, Resource, Value, detect, read};
+pub use mplog::{Entry, EntryKind, MpLog, is_mplog_name, read_mplog};
 pub use time::{Precision, Time};
 
 /// This crate's version, for records of what parsed them.

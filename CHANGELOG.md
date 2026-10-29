@@ -30,7 +30,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   bytes from after it; every read now stays within that size, and bytes after it are reported.
   The other sizes the tracking data declares are checked too: a header that doesn't fit or lacks
   any of its five fields (an empty one cut short was taken as whole), a whole size that isn't the
-  data's, a size smaller than itself.
+  data's, the pairs' size they repeat differing from the header's, a size smaller than itself; and
+  a header's fifth value (0 in every file seen) is noted when it isn't 0.
 - Damaged text in strings, tracking keys and values was read without a problem: an odd byte
   dropped, text after the NUL ignored, invalid UTF-16 or UTF-8 replaced. Each is now reported.
 - A file cut inside its last value's padding read as whole; padding cut short is now reported, and

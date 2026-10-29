@@ -690,7 +690,8 @@ fn read_tracking(data: &[u8], problems: &mut Vec<String>) -> Vec<(String, Value)
 
 /// The pairs, read within the size the data declares (bytes past it are not evidence), and that
 /// size. Every size declared is checked against what is there: the header's own, the whole's
-/// (after the pairs, which are kept), and the pairs'. Damaged text is noted in `notes`.
+/// (after the pairs, which are kept), and the pairs' (as the header gives it, and as they repeat
+/// it). Damaged text, and a header's fifth value when it isn't 0, are noted in `notes`.
 fn read_pairs(
     data: &[u8],
     tracking: &mut Vec<(String, Value)>,
@@ -706,6 +707,11 @@ fn read_pairs(
         if header < 20 || header > data.len() {
             return Err(format!("a header of {header} bytes in {}", data.len()));
         }
+        // Its fifth value, meaning not known, is 0 in every file seen: any other isn't lost.
+        match u32_at(data, 16) {
+            Some(0) | None => {}
+            Some(fifth) => notes.push(format!("a header whose fifth value is {fifth}, not 0")),
+        }
         if pairs == 0 {
             if whole != data.len() {
                 return Err(format!("{whole} bytes said, {} there", data.len()));
@@ -714,6 +720,13 @@ fn read_pairs(
         }
         if pairs < 4 {
             return Err(format!("pairs of {pairs} bytes, less than their size's 4"));
+        }
+        // The pairs start with their size again: read within the header's, any other noted.
+        let own = u32_at(data, header).ok_or_else(cut)? as usize;
+        if own != pairs {
+            notes.push(format!(
+                "pairs whose own size is {own}, the header's {pairs}"
+            ));
         }
         (header + 4, header.saturating_add(pairs), Some(whole))
     } else {
@@ -990,6 +1003,11 @@ mod tests {
             let mut problems = Vec::new();
             (read_tracking(data, &mut problems), problems)
         };
+        // A fifth header value that isn't 0: noted, the rest read.
+        assert_eq!(
+            read(&words(&[1, 0x14, 0, 0x14, 7])).1,
+            ["tracking data: a header whose fifth value is 7, not 0"]
+        );
         // A header smaller than its five fields, and a size smaller than itself.
         assert_eq!(read(&words(&[1, 8, 0, 20, 0])).1.len(), 1);
         assert_eq!(read(&words(&[1, 16, 0, 16])).1.len(), 1);
@@ -1049,6 +1067,30 @@ mod tests {
 
         assert_eq!(read_tracking(&data, &mut problems), []);
         assert_eq!(problems, ["tracking data: a header of 16 bytes in 16"]);
+    }
+
+    #[test]
+    fn headed_tracking_checks_the_inner_pairs_size() {
+        let pairs = pair("A", 3, &1u32.to_le_bytes());
+        let declared = (pairs.len() + 4) as u32;
+        let mut data: Vec<u8> = [1u32, 0x14, declared, declared + 0x14, 0]
+            .into_iter()
+            .flat_map(u32::to_le_bytes)
+            .collect();
+        data.extend(4u32.to_le_bytes()); // conflicting inner values-data size
+        data.extend(pairs);
+        let mut problems = Vec::new();
+
+        assert_eq!(
+            read_tracking(&data, &mut problems),
+            [("A".to_owned(), Value::Integer(1))]
+        );
+        assert_eq!(
+            problems,
+            [format!(
+                "tracking data: pairs whose own size is 4, the header's {declared}"
+            )]
+        );
     }
 
     #[test]

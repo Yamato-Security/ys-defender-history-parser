@@ -12,6 +12,50 @@ fn real() -> Vec<u8> {
 }
 
 #[test]
+fn resource_kind_and_location_must_be_text() {
+    let original =
+        include_bytes!("fixtures/orange/original/94BBE9CF-CDEB-4885-9178-CC93FB10822D").to_vec();
+    // The first resource's kind (a 10-byte string, "file") and its location, made blobs.
+    for (at, key) in [(0x174, "3.1"), (0x18C, "3.2")] {
+        let mut data = original.clone();
+        assert_eq!(&data[at..at + 4], &0x15_u32.to_le_bytes(), "{key}");
+        data[at..at + 4].copy_from_slice(&0x28_u32.to_le_bytes()); // BLOB
+        let detection = defender::read(&data).unwrap();
+        assert_eq!(
+            detection.problems.len(),
+            1,
+            "{key}: {:?}",
+            detection.problems
+        );
+        assert!(
+            detection.problems[0].contains(&format!("{key} has type 0x28")),
+            "{:?}",
+            detection.problems
+        );
+        assert!(
+            detection
+                .unknown
+                .iter()
+                .any(|(k, v)| k == key && matches!(v, defender::Value::Bytes(_))),
+            "{key}: {:?}",
+            detection.unknown
+        );
+        let resource = &detection.resources[0];
+        let (kind, location) = (resource.kind.as_str(), resource.location.as_str());
+        if key == "3.1" {
+            assert_eq!(
+                (kind, location),
+                ("", r"C:\Users\RaptorSniper\Downloads\a.zip")
+            );
+        } else {
+            assert_eq!((kind, location), ("file", ""));
+        }
+        // the rest of the file still read
+        assert!(detection.remediation.is_some());
+    }
+}
+
+#[test]
 fn final_value_padding_cut_short_is_reported() {
     let mut data = include_bytes!(
         "fixtures/museum/apt-simulator-vm/DetectionHistory/00/\

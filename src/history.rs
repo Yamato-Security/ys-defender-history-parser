@@ -640,13 +640,17 @@ impl Reader<'_> {
         if self.at_separator() {
             self.next += 1;
         }
-        let kind = self.take(&format!("{section}.1"))?.value.to_string();
-        let location = self.take(&format!("{section}.2"))?.value.to_string();
+        // text, as the other named values are checked: another type is kept as unknown
+        let kind = self.text(&format!("{section}.1"));
+        let location = self.text(&format!("{section}.2"));
+        if self.ended {
+            return None;
+        }
         let flags = self.integer(&format!("{section}.3"));
         let size = self.integer(&format!("{section}.4"));
         let mut resource = Resource {
-            kind,
-            location,
+            kind: kind.unwrap_or_default(),
+            location: location.unwrap_or_default(),
             flags,
             tracking: Vec::new(),
         };

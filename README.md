@@ -27,10 +27,10 @@ SHA-256).
 
 ## Why this crate
 
-DetectionHistory has no Eric Zimmerman tool. The parsers that read it, compared on the 21 public
-files there are (plaso's 2, Orange Cyberdefense's 4, DFIRArtifactMuseum's 14, DHParser's 1), against
-Orange Cyberdefense's [wddh](https://github.com/cert-orangecyberdefense/wddh-parser), which reads
-every value of the file. Its 387 tracking values (hashes, sizes, times, process ids):
+The parsers that read DetectionHistory, compared on the 21 public files there are (plaso's 2,
+Orange Cyberdefense's 4, DFIRArtifactMuseum's 14, DHParser's 1), against Orange Cyberdefense's
+[wddh](https://github.com/cert-orangecyberdefense/wddh-parser), which reads every value of the
+file. Its 387 tracking values (hashes, sizes, times, process ids):
 
 | Parser | What it reads | Tracking values equal to wddh's |
 | --- | --- | --- |

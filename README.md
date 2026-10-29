@@ -148,9 +148,10 @@ its own:
 - a content (`ResourceData`) is a file's `BackupRead` streams, or a registry hive (a registry key's
   or a service's), and its identifier is the SHA-1 of it decrypted.
 
-The sizes, both CRCs and the SHA-1 are checked: a part cut short, changed or damaged is reported.
-`read_resource_data` keeps the content in memory to read it; `file_data` is what was quarantined
-for an ordinary file. A sparse file is reconstructed from its allocated blocks with
+The sizes and both CRCs are checked: a part cut short, changed or damaged is reported.
+`read_resource_data` computes the content's SHA-1 as its `id`, to compare with the `ResourceData`
+file's name, and keeps the content in memory to read it. `file_data` is what was quarantined for an
+ordinary file. A sparse file is reconstructed from its allocated blocks with
 `reconstruct_sparse_file` and the `FileSize` in its entry, preserving zero regions. `hashes` gives
 the recovered file's MD5, SHA-1 and SHA-256 (as the detection history's tracking data does).
 

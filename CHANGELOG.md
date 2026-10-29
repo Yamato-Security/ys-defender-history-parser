@@ -82,7 +82,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   entries holding it) and contents (`read_resource_data`: decrypted, a file's `BackupRead`
   streams or a registry hive; `owner`, `zone_identifier`, `file_data`), including sparse files
   reconstructed from their blocks and logical size, with `crypt` (RC4 with Defender's key),
-  `detect` and `hashes`. Sizes, CRCs and the content's SHA-1 are checked.
+  `detect` and `hashes`. Sizes and CRCs are checked; the content's SHA-1 is computed as its ID to
+  compare with its file's name.
 - `sootmark-common` is a dependency again, for CRC-32, MD5, SHA-1 and SHA-256.
 
 ### Tests

@@ -15,8 +15,9 @@
 //! Every part is RC4-encrypted with the key Defender holds ([`crypt`]). An entry and a resource
 //! record are a 60-byte header (two magic numbers, the sizes of two sections and their CRC-32s,
 //! stored without the CRC's final inversion) and the two sections, each encrypted on its own.
-//! The sizes, the CRCs and the content's SHA-1 are checked, so damage and changes are reported,
-//! never hidden.
+//! The sizes and CRCs are checked, so damage and changes there are reported. A content's SHA-1 is
+//! computed as [`ResourceData::id`]; compare it with the `ResourceData` file's name to check the
+//! content itself.
 
 use std::fmt::Write;
 use std::ops::Range;

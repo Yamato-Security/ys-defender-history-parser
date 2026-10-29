@@ -686,7 +686,8 @@ fn read_pairs(
         let header = u32_at(data, 4).ok_or_else(cut)? as usize;
         let pairs = u32_at(data, 8).ok_or_else(cut)? as usize;
         let whole = u32_at(data, 12).ok_or_else(cut)? as usize;
-        if header < 16 || header > data.len() {
+        // Its five fields, 20 bytes, at least.
+        if header < 20 || header > data.len() {
             return Err(format!("a header of {header} bytes in {}", data.len()));
         }
         if pairs == 0 {
@@ -956,8 +957,9 @@ mod tests {
             let mut problems = Vec::new();
             (read_tracking(data, &mut problems), problems)
         };
-        // A header smaller than the fields read, and a size smaller than itself.
+        // A header smaller than its five fields, and a size smaller than itself.
         assert_eq!(read(&words(&[1, 8, 0, 20, 0])).1.len(), 1);
+        assert_eq!(read(&words(&[1, 16, 0, 16])).1.len(), 1);
         assert_eq!(read(&words(&[2, 0])).1.len(), 1);
         // A whole size that isn't the data's: the pairs are kept, with the problem.
         let pairs = pair("A", 3, &1u32.to_le_bytes());
@@ -1002,6 +1004,18 @@ mod tests {
         let tracking = read_tracking(&data, &mut problems);
         assert_eq!(tracking.len(), 2);
         assert_eq!(problems.len(), 2, "{problems:?}");
+    }
+
+    #[test]
+    fn tracking_header_must_include_all_five_fields() {
+        let data: Vec<u8> = [1u32, 0x10, 0, 0x10]
+            .into_iter()
+            .flat_map(u32::to_le_bytes)
+            .collect();
+        let mut problems = Vec::new();
+
+        assert_eq!(read_tracking(&data, &mut problems), []);
+        assert_eq!(problems, ["tracking data: a header of 16 bytes in 16"]);
     }
 
     #[test]

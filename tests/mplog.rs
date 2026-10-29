@@ -372,6 +372,72 @@ fn sdn_paths_with_parentheses() {
 }
 
 #[test]
+fn records_cut_short_are_reported_and_kept() {
+    for (text, kind, fields, problem) in [
+        (
+            "BEGIN BM telemetry\nProcessID: 42\n",
+            EntryKind::BmTelemetry,
+            1,
+            "line 1: BmTelemetry without its end (END BM telemetry), read to line 2",
+        ),
+        (
+            "BEGIN RTP Perf Log\nRTP Start: 12-15-2022 11:24:33\n",
+            EntryKind::RtpPerf,
+            1,
+            "line 1: RtpPerf without its end (END RTP Perf Log), read to line 2",
+        ),
+        (
+            "Microsoft Defender Antivirus Service Log\nStarted On 05-06-2024 06:20:45\n",
+            EntryKind::LogHeader,
+            2,
+            "line 1: LogHeader without its end (Current time:), read to line 2",
+        ),
+    ] {
+        let log = read_mplog(text.as_bytes());
+        assert_eq!(log.problems, [problem], "{text:?}");
+        let [entry] = &log.entries[..] else {
+            panic!("{text:?}: {:?}", log.entries)
+        };
+        assert_eq!(entry.kind, kind);
+        assert_eq!(entry.fields.len(), fields, "{entry:?}");
+    }
+
+    // Cut short by the next timed line, which is still read; a service log
+    // whose header is cut short has nothing saying its times are UTC.
+    let impact = "ProcessImageName: a.exe, Pid: 1, TotalTime: 1, Count: 1, MaxTime: 1, MaxTimeFile: x, EstimatedImpact: 1%";
+    let text = format!(
+        "Microsoft Defender Antivirus Service Log\nCurrent time: 05/06/2024 13:20:45.0 UTC (9 ms since boot)\n\
+         2024-05-06T13:20:46.000 {impact}\n\
+         BEGIN BM telemetry\nProcessID: 42\n\
+         2024-05-06T13:20:47.000 {impact}\n\
+         Microsoft Defender Antivirus Service Log\n\
+         2024-05-06T13:20:48.000 {impact}\n"
+    );
+    let log = read_mplog(text.as_bytes());
+    assert_eq!(
+        log.problems,
+        [
+            "line 4: BmTelemetry without its end (END BM telemetry), read to line 5",
+            "line 7: LogHeader without its end (Current time:), read to line 7",
+        ]
+    );
+    let times: Vec<String> = log
+        .entries
+        .iter()
+        .filter(|e| e.kind == EntryKind::EstimatedImpact)
+        .map(|e| e.time.unwrap().to_iso8601())
+        .collect();
+    assert_eq!(
+        times,
+        [
+            "2024-05-06T13:20:46.000Z",
+            "2024-05-06T13:20:47.000Z",
+            "2024-05-06T13:20:48.000"
+        ]
+    );
+}
+
+#[test]
 fn damaged_text_is_reported() {
     let text = "2021-07-22T15:38:04.557Z ProcessImageName:a.exe, Pid: 1, TotalTime: 1, Count: 1, MaxTime: 1, MaxTimeFile: x, EstimatedImpact: 1%\n";
 

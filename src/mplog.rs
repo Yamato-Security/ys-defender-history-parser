@@ -249,9 +249,11 @@ struct Zone {
 }
 
 impl Zone {
-    fn header(&mut self, time: Time) {
+    /// A new service log, and its header's time (`None` when its header was cut short: nothing
+    /// then says its times without a zone are UTC).
+    fn header(&mut self, time: Option<Time>) {
         *self = Self {
-            header: Some(time),
+            header: time,
             last: self.last,
             ..Self::default()
         };
@@ -293,19 +295,15 @@ pub fn read_mplog(data: &[u8]) -> MpLog {
     while at < lines.len() {
         let line = lines[at];
         if let Some(time) = current_time(line) {
-            zone.header(time);
+            zone.header(Some(time));
         }
-        if let Some((entry, used)) = log_header(&lines, at) {
-            if let Some(time) = entry.time {
-                zone.header(time);
-            }
-            log.entries.push(entry);
-            at += used;
-            continue;
-        }
-        if let Some((entry, used)) = block(&lines, at, &zone) {
-            log.entries.push(entry);
-            at += used;
+        let record = log_header(&lines, at)
+            .inspect(|header| zone.header(header.entry.time))
+            .or_else(|| block(&lines, at, &zone));
+        if let Some(record) = record {
+            log.problems.extend(record.cut);
+            log.entries.push(record.entry);
+            at += record.used;
             continue;
         }
         if let Some(body) = line.strip_prefix("Per-process counts:") {
@@ -455,9 +453,62 @@ fn current_time(line: &str) -> Option<Time> {
     header_time(line.strip_prefix("Current time: ")?)
 }
 
+/// A multi-line record read: its entry, the lines it spans, and when its end
+/// wasn't found, a problem saying so.
+struct Record {
+    entry: Entry,
+    used: usize,
+    cut: Option<String>,
+}
+
+impl Record {
+    /// A record of `body` lines after its first, ended by `end` or cut short.
+    fn new(entry: Entry, body: usize, ended: bool, end: &str) -> Self {
+        let cut = (!ended).then(|| {
+            format!(
+                "line {}: {} without its end ({end}), read to line {}",
+                entry.line,
+                entry.kind.name(),
+                entry.line + body
+            )
+        });
+        Self {
+            used: 1 + body + usize::from(ended),
+            entry,
+            cut,
+        }
+    }
+}
+
+/// How many lines after `at` a record's body spans, and whether its end
+/// (`is_end`) follows them. A record is cut short by a timed line or another
+/// record's start (no record holds either), by `limit` lines, or by the
+/// file's end.
+fn extent(lines: &[&str], at: usize, limit: usize, is_end: impl Fn(&str) -> bool) -> (usize, bool) {
+    for (n, line) in lines.iter().skip(at + 1).take(limit).enumerate() {
+        if is_end(line) {
+            return (n, true);
+        }
+        if starts_record(line) {
+            return (n, false);
+        }
+    }
+    (lines.len().saturating_sub(at + 1).min(limit), false)
+}
+
+/// Whether a line starts something of its own: a timed line, a service log,
+/// a block.
+fn starts_record(line: &str) -> bool {
+    let line = line.trim();
+    timestamped(line).is_some()
+        || line.ends_with(" Service Log")
+        || (line.contains("RTP Perf Log") && !line.contains("END RTP Perf Log"))
+        || BLOCKS.iter().any(|(_, begin, _)| line.contains(begin))
+}
+
 /// The service log's header, from its `<service> (<GUID>) Service Log` line
-/// to its `Current time:` line, and how many lines it spans.
-fn log_header(lines: &[&str], at: usize) -> Option<(Entry, usize)> {
+/// to its `Current time:` line.
+fn log_header(lines: &[&str], at: usize) -> Option<Record> {
     let title = lines[at].trim().strip_suffix(" Service Log")?;
     let mut fields = Fields::new();
     match title.rsplit_once(" (") {
@@ -467,34 +518,36 @@ fn log_header(lines: &[&str], at: usize) -> Option<(Entry, usize)> {
         ])),
         None => fields.extend(pairs(&[("Service", title)])),
     }
-    for (i, line) in lines.iter().enumerate().skip(at + 1).take(8) {
+    let (body, ended) = extent(lines, at, 8, |l| l.starts_with("Current time: "));
+    for line in &lines[at + 1..at + 1 + body] {
         if let Some(started) = line.strip_prefix("Started On ") {
             fields.extend(pairs(&[("StartedOn", started)]));
         } else if let Some(installed) = line.strip_prefix("OS install time: ") {
             let installed =
                 header_time(installed).map_or_else(|| installed.to_owned(), Time::to_iso8601);
             fields.push(("OsInstallTime".to_owned(), installed));
-        } else if let Some(current) = line.strip_prefix("Current time: ") {
-            let time = header_time(current);
-            if let Some(time) = time {
-                fields.push(("CurrentTime".to_owned(), time.to_iso8601()));
-            }
-            if let Some((_, boot)) = current.split_once(" (") {
-                let ms = boot
-                    .trim_end_matches(')')
-                    .trim_end_matches(" ms since boot");
-                fields.extend(pairs(&[("MsSinceBoot", ms)]));
-            }
-            let entry = Entry {
-                line: at + 1,
-                time,
-                kind: EntryKind::LogHeader,
-                fields,
-            };
-            return Some((entry, i + 1 - at));
         }
     }
-    None
+    let mut time = None;
+    if let Some(current) = ended.then(|| &lines[at + 1 + body]["Current time: ".len()..]) {
+        time = header_time(current);
+        if let Some(time) = time {
+            fields.push(("CurrentTime".to_owned(), time.to_iso8601()));
+        }
+        if let Some((_, boot)) = current.split_once(" (") {
+            let ms = boot
+                .trim_end_matches(')')
+                .trim_end_matches(" ms since boot");
+            fields.extend(pairs(&[("MsSinceBoot", ms)]));
+        }
+    }
+    let entry = Entry {
+        line: at + 1,
+        time,
+        kind: EntryKind::LogHeader,
+        fields,
+    };
+    Some(Record::new(entry, body, ended, "Current time:"))
 }
 
 type Fields = Vec<(String, String)>;
@@ -765,17 +818,13 @@ fn labelled(text: &str, labels: &[&str]) -> Fields {
 }
 
 /// A multi-line block starting at `at`, and how many lines it spans.
-fn block(lines: &[&str], at: usize, zone: &Zone) -> Option<(Entry, usize)> {
+fn block(lines: &[&str], at: usize, zone: &Zone) -> Option<Record> {
     let line = lines[at].trim();
     if line.contains("RTP Perf Log") && !line.contains("END RTP Perf Log") {
-        return rtp_perf(lines, at, zone);
+        return Some(rtp_perf(lines, at, zone));
     }
     let &(kind, _, end) = BLOCKS.iter().find(|(_, begin, _)| line.contains(begin))?;
-    let body = lines
-        .iter()
-        .skip(at + 1)
-        .take(MAX_BLOCK)
-        .position(|l| l.contains(end))?;
+    let (body, ended) = extent(lines, at, MAX_BLOCK, |l| l.contains(end));
     let mut fields = Fields::new();
     for line in &lines[at + 1..at + 1 + body] {
         if let Some((label, value)) = line.split_once(':') {
@@ -793,7 +842,7 @@ fn block(lines: &[&str], at: usize, zone: &Zone) -> Option<(Entry, usize)> {
         kind,
         fields,
     };
-    Some((entry, body + 2))
+    Some(Record::new(entry, body, ended, end))
 }
 
 /// A block's time: a telemetry's process creation (FILETIME), a scan's or
@@ -831,12 +880,9 @@ fn us_time(text: &str) -> Option<Time> {
 
 /// The real-time protection performance log: its times, plugin states, and
 /// the indented lists of exclusions.
-fn rtp_perf(lines: &[&str], at: usize, zone: &Zone) -> Option<(Entry, usize)> {
-    let body = lines
-        .iter()
-        .skip(at + 1)
-        .take(MAX_BLOCK)
-        .position(|l| l.contains("END RTP Perf Log"))?;
+fn rtp_perf(lines: &[&str], at: usize, zone: &Zone) -> Record {
+    const END: &str = "END RTP Perf Log";
+    let (body, ended) = extent(lines, at, MAX_BLOCK, |l| l.contains(END));
     let mut fields = Fields::new();
     let mut list: Option<&str> = None;
     for line in &lines[at + 1..at + 1 + body] {
@@ -873,7 +919,7 @@ fn rtp_perf(lines: &[&str], at: usize, zone: &Zone) -> Option<(Entry, usize)> {
         kind: EntryKind::RtpPerf,
         fields,
     };
-    Some((entry, body + 2))
+    Record::new(entry, body, ended, END)
 }
 
 #[cfg(test)]

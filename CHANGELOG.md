@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0 (Unreleased)
+
+### Changed
+- The crate is named after its repository, `ys-defender-history-parser` (its library is still
+  `defender`: depend on it as `defender = { package = "ys-defender-history-parser", … }`), version
+  1.0.0, by Florian Amette and Zach Mathis (@yamatosecurity), on Rust's 2024 edition, and requires
+  Rust 1.99. (@YamatoSecurity)
+
 ## 0.3.0 (ys-defender-history-parser)
 
 First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/defender ad9ded1).

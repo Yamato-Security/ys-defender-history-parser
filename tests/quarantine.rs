@@ -5,10 +5,10 @@
 
 use std::path::{Path, PathBuf};
 
-use defender::quarantine::{
-    crypt, detect, hashes, read_entry, read_resource_data, read_resource_record, Entry,
-};
 use defender::Value;
+use defender::quarantine::{
+    Entry, crypt, detect, hashes, read_entry, read_resource_data, read_resource_record,
+};
 
 const FILE_ENTRY: &str = "80012345-0000-0000-1A2B-3C4D5E6F7081";
 const SERVICE_ENTRY: &str = "80054321-0000-0000-9A8B-7C6D5E4F3021";
@@ -214,10 +214,12 @@ fn damaged_sparse_blocks_and_stream_names_are_reported() {
     let mut short = stream(1, 8, "", &[]);
     short.extend(stream(9, 8, "", b"short"));
     let short = read_resource_data(&crypt(&short));
-    assert!(short
-        .problems
-        .iter()
-        .any(|p| p.contains("8-byte file offset")));
+    assert!(
+        short
+            .problems
+            .iter()
+            .any(|p| p.contains("8-byte file offset"))
+    );
     assert!(short.reconstruct_sparse_file(10).is_err());
 
     let mut overflow = stream(1, 8, "", &[]);
@@ -229,10 +231,12 @@ fn damaged_sparse_blocks_and_stream_names_are_reported() {
     assert!(overflow.reconstruct_sparse_file(10).is_err());
 
     let named_data = read_resource_data(&crypt(&stream(1, 0, "not allowed", b"data")));
-    assert!(named_data
-        .problems
-        .iter()
-        .any(|p| p.contains("kind 1 with a name")));
+    assert!(
+        named_data
+            .problems
+            .iter()
+            .any(|p| p.contains("kind 1 with a name"))
+    );
 
     // Even when the sparse attribute itself is damaged, do not present the empty base stream as
     // the complete file. The block remains recoverable, alongside the reported inconsistency.
@@ -241,10 +245,12 @@ fn damaged_sparse_blocks_and_stream_names_are_reported() {
     block.extend(b"evidence");
     missing_attribute.extend(stream(9, 8, "", &block));
     let missing_attribute = read_resource_data(&crypt(&missing_attribute));
-    assert!(missing_attribute
-        .problems
-        .iter()
-        .any(|p| p.contains("without a preceding sparse data stream")));
+    assert!(
+        missing_attribute
+            .problems
+            .iter()
+            .any(|p| p.contains("without a preceding sparse data stream"))
+    );
     assert_eq!(missing_attribute.file_data(), None);
     assert_eq!(
         missing_attribute.reconstruct_sparse_file(10).unwrap(),

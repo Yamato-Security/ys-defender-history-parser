@@ -1,11 +1,12 @@
 [package]
-name = "sootmark-defender"
-version = "0.3.0"
+name = "ys-defender-history-parser"
+version = "1.0.0"
+authors = ["Florian Amette", "Zach Mathis (@yamatosecurity)"]
 # Yamato Security's fork of the upstream crate (https://github.com/Sootmark/defender): not published
 # under the upstream name.
 publish = false
-edition = "2021"
-rust-version = "1.80"
+edition = "2024"
+rust-version = "1.99"
 description = "Microsoft Defender for forensics: its detection history files (the threat, its status and what was done, where it was found with hashes and times, the user, process, detection source and quarantine entry) and its protection and detection logs (MPLog, MPDetection: detections, programs scanned, exclusions, telemetry, service starts and versions)."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Yamato-Security/ys-defender-history-parser"

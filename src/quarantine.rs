@@ -25,7 +25,7 @@ use std::ops::Range;
 use common::checksum::Crc32;
 use common::{md5::Md5, sha1::Sha1, sha256::Sha256};
 
-use crate::history::{ascii, guid, hex, u32_at, u64_at, utf16, Error, Value};
+use crate::history::{Error, Value, ascii, guid, hex, u32_at, u64_at, utf16};
 use crate::time::Time;
 
 /// The RC4 key Defender encrypts its quarantine with, as cuckoo-modified's `quarantine.py`
@@ -479,14 +479,13 @@ pub fn read_resource_record(data: &[u8]) -> Result<ResourceRecord, Error> {
             ));
         }
     }
-    let ids = second.chunks_exact(16);
-    if !ids.remainder().is_empty() {
-        record.problems.push(format!(
-            "{} bytes after section 2's entries",
-            ids.remainder().len()
-        ));
+    let (ids, rest) = second.as_chunks::<16>();
+    if !rest.is_empty() {
+        record
+            .problems
+            .push(format!("{} bytes after section 2's entries", rest.len()));
     }
-    record.entries = ids.map(guid).collect();
+    record.entries = ids.iter().map(|id| guid(id)).collect();
     Ok(record)
 }
 
@@ -632,7 +631,7 @@ pub fn read_resource_data(data: &[u8]) -> ResourceData {
             .iter()
             .rev()
             .find(|s| matches!(s.kind, 1 | 4));
-        if parent.map_or(true, |s| s.attributes & STREAM_SPARSE_ATTRIBUTE == 0) {
+        if parent.is_none_or(|s| s.attributes & STREAM_SPARSE_ATTRIBUTE == 0) {
             read.problems.push(format!(
                 "stream {i}: a sparse block without a preceding sparse data stream"
             ));

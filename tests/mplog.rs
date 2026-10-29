@@ -372,6 +372,27 @@ fn sdn_paths_with_parentheses() {
 }
 
 #[test]
+fn damaged_text_is_reported() {
+    let text = "2021-07-22T15:38:04.557Z ProcessImageName:a.exe, Pid: 1, TotalTime: 1, Count: 1, MaxTime: 1, MaxTimeFile: x, EstimatedImpact: 1%\n";
+
+    let mut utf16 = vec![0xff, 0xfe];
+    utf16.extend(text.encode_utf16().flat_map(u16::to_le_bytes));
+    utf16.push(0xff); // truncated code unit
+    let log = read_mplog(&utf16);
+    assert_eq!(log.entries.len(), 1);
+    assert_eq!(
+        log.problems,
+        ["an odd byte at the end (UTF-16 is in pairs), not read"]
+    );
+
+    let mut utf8 = text.as_bytes().to_vec();
+    utf8.push(0xff); // invalid UTF-8
+    let log = read_mplog(&utf8);
+    assert_eq!(log.entries.len(), 1);
+    assert_eq!(log.problems, ["text that isn't valid UTF-8, replaced"]);
+}
+
+#[test]
 fn other_files_have_no_entries() {
     assert_eq!(read_mplog(b"").entries, []);
     assert_eq!(read_mplog(b"just\nsome\ntext").entries, []);

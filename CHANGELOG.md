@@ -31,6 +31,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   The other sizes the tracking data declares are checked too: a header that doesn't fit (an empty
   one cut short was taken as whole), a whole size that isn't the data's, a size smaller than
   itself.
+- Damaged text in strings, tracking keys and values was read without a problem: an odd byte
+  dropped, text after the NUL ignored, invalid UTF-16 or UTF-8 replaced. Each is now reported.
 - Files without `Magic.Version:1.2` (Windows Server 2016's, as Orange Cyberdefense found) were
   refused: a file is recognised by its first values (a threat identifier, a GUID, a string).
 
@@ -56,6 +58,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   `C:\Program Files`; the device path group is now found from the end. Queries of files not hashed
   (no `(sha1=…)`) were left out; their device path is kept too (`DevicePath`).
 - An EMS scan's process name was cut at its first space; it now runs to its pid.
+- A log's odd last byte (UTF-16) was dropped, and invalid UTF-8 replaced, without a problem; both
+  are now reported.
 - Malformed times were read as plausible ones: an offset out of RFC 3339's range (`+02:60` was
   taken as three hours) or a number with a sign (`+7`, which Rust's parsing accepts). Every number
   in a time must now be digits, and offsets within 00:00 to 23:59. A time an offset takes past

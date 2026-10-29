@@ -410,7 +410,13 @@ fn values(data: &[u8], problems: &mut Vec<String>) -> Vec<Raw> {
             }
             INTEGER_64 if size == 8 => Value::Integer(u64_at(bytes, 0).unwrap_or(0)),
             FILETIME if size == 8 => Value::Time(u64_at(bytes, 0).unwrap_or(0)),
-            STRING => Value::Text(utf16(bytes)),
+            STRING => {
+                let (text, damage) = utf16(bytes);
+                if let Some(damage) = damage {
+                    problems.push(format!("offset {at:#x}: a string with {damage}"));
+                }
+                Value::Text(text)
+            }
             GUID if size == 16 => Value::Guid(guid(bytes)),
             _ => Value::Bytes(bytes.to_vec()),
         };
@@ -649,21 +655,31 @@ fn read_tracking(data: &[u8], problems: &mut Vec<String>) -> Vec<(String, Value)
     if data.is_empty() {
         return tracking;
     }
-    match read_pairs(data, &mut tracking) {
-        Ok(end) if end < data.len() => problems.push(format!(
-            "tracking data: {} bytes after the {end} it declares, not read",
+    let mut notes = Vec::new();
+    match read_pairs(data, &mut tracking, &mut notes) {
+        Ok(end) if end < data.len() => notes.push(format!(
+            "{} bytes after the {end} it declares, not read",
             data.len() - end
         )),
         Ok(_) => {}
-        Err(why) => problems.push(format!("tracking data: {why}")),
+        Err(why) => notes.push(why),
     }
+    problems.extend(
+        notes
+            .into_iter()
+            .map(|note| format!("tracking data: {note}")),
+    );
     tracking
 }
 
 /// The pairs, read within the size the data declares (bytes past it are not evidence), and that
 /// size. Every size declared is checked against what is there: the header's own, the whole's
-/// (after the pairs, which are kept), and the pairs'.
-fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<usize, String> {
+/// (after the pairs, which are kept), and the pairs'. Damaged text is noted in `notes`.
+fn read_pairs(
+    data: &[u8],
+    tracking: &mut Vec<(String, Value)>,
+    notes: &mut Vec<String>,
+) -> Result<usize, String> {
     let first = u32_at(data, 0).ok_or("shorter than 4 bytes")? as usize;
     let (mut at, end, whole) = if first == 1 {
         let cut = || format!("a header cut short ({} bytes)", data.len());
@@ -696,10 +712,13 @@ fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<usize,
     let data = &data[..end];
     while at < end {
         let key_size = u32_at(data, at).ok_or("a key cut short")? as usize;
-        let key = utf16(
+        let (key, damage) = utf16(
             data.get(at + 4..(at + 4).saturating_add(key_size))
                 .ok_or("a key past the end")?,
         );
+        if let Some(damage) = damage {
+            notes.push(format!("{key}: a key with {damage}"));
+        }
         at += 4 + key_size;
         let kind = u32_at(data, at).ok_or_else(|| format!("{key}: its type cut short"))?;
         at += 4;
@@ -712,17 +731,17 @@ fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<usize,
             3 => (u32_at(data, at).map(|v| Value::Integer(u64::from(v))), 4),
             4 => (u64_at(data, at).map(Value::Integer), 8),
             5 => (data.get(at).map(|&b| Value::Bool(b != 0)), 1),
-            6 => {
+            6 | 7 => {
                 let bytes = sized(at)?;
-                (Some(Value::Text(utf16(bytes))), 4 + bytes.len())
-            }
-            7 => {
-                let bytes = sized(at)?;
-                let text = String::from_utf8_lossy(bytes);
-                (
-                    Some(Value::Text(text.trim_end_matches('\0').to_owned())),
-                    4 + bytes.len(),
-                )
+                let (text, damage) = if kind == 6 {
+                    utf16(bytes)
+                } else {
+                    ascii(bytes)
+                };
+                if let Some(damage) = damage {
+                    notes.push(format!("{key}: a value with {damage}"));
+                }
+                (Some(Value::Text(text)), 4 + bytes.len())
             }
             other => {
                 let rest = data.get(at..end).unwrap_or_default().to_vec();
@@ -750,14 +769,40 @@ fn u64_at(data: &[u8], at: usize) -> Option<u64> {
     Some(u64::from_le_bytes(data.get(at..at + 8)?.try_into().ok()?))
 }
 
-/// UTF-16LE text up to its first NUL.
-fn utf16(bytes: &[u8]) -> String {
-    let units: Vec<u16> = bytes
-        .chunks_exact(2)
-        .map(|p| u16::from_le_bytes([p[0], p[1]]))
-        .take_while(|&u| u != 0)
-        .collect();
-    String::from_utf16_lossy(&units)
+/// UTF-16LE text up to its first NUL, and what was damaged: an odd byte at its end, text after
+/// its NUL, or text that isn't UTF-16 (replaced).
+fn utf16(bytes: &[u8]) -> (String, Option<&'static str>) {
+    let pairs = bytes.chunks_exact(2);
+    let odd = !pairs.remainder().is_empty();
+    let units: Vec<u16> = pairs.map(|p| u16::from_le_bytes([p[0], p[1]])).collect();
+    let end = units.iter().position(|&u| u == 0).unwrap_or(units.len());
+    let text = String::from_utf16(&units[..end]);
+    let damage = if odd {
+        Some("an odd byte at its end")
+    } else if units[end..].iter().any(|&u| u != 0) {
+        Some("text after its NUL")
+    } else if text.is_err() {
+        Some("text that isn't UTF-16, replaced")
+    } else {
+        None
+    };
+    let text = text.unwrap_or_else(|_| String::from_utf16_lossy(&units[..end]));
+    (text, damage)
+}
+
+/// An ASCII string (read as UTF-8) up to its first NUL, and what was damaged: text after its
+/// NUL, or text that isn't UTF-8 (replaced).
+fn ascii(bytes: &[u8]) -> (String, Option<&'static str>) {
+    let end = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
+    let text = String::from_utf8_lossy(&bytes[..end]);
+    let damage = if bytes[end..].iter().any(|&b| b != 0) {
+        Some("text after its NUL")
+    } else if std::str::from_utf8(&bytes[..end]).is_err() {
+        Some("text that isn't UTF-8, replaced")
+    } else {
+        None
+    };
+    (text.into_owned(), damage)
 }
 
 fn hex(bytes: &[u8]) -> String {
@@ -881,7 +926,10 @@ mod tests {
         data.append(&mut pair);
         let mut tracking = Vec::new();
 
-        assert!(read_pairs(&data, &mut tracking).is_err(), "{tracking:?}");
+        assert!(
+            read_pairs(&data, &mut tracking, &mut Vec::new()).is_err(),
+            "{tracking:?}"
+        );
         assert!(tracking.is_empty(), "{tracking:?}");
     }
 
@@ -920,6 +968,40 @@ mod tests {
         let (tracking, problems) = read(&data);
         assert_eq!(tracking, [("A".to_owned(), Value::Integer(1))]);
         assert_eq!(problems.len(), 1, "{problems:?}");
+    }
+
+    #[test]
+    fn damaged_text_is_reported() {
+        assert_eq!(utf16(&text("ok")), ("ok".to_owned(), None));
+        assert_eq!(utf16(b"o\0k").1, Some("an odd byte at its end"));
+        assert_eq!(
+            utf16(&[b'a', 0, 0, 0, b'b', 0]).1,
+            Some("text after its NUL")
+        );
+        assert_eq!(
+            utf16(&[0x00, 0xD8, b'a', 0]).1,
+            Some("text that isn't UTF-16, replaced")
+        );
+        assert_eq!(ascii(b"TTData={}\0"), ("TTData={}".to_owned(), None));
+        assert_eq!(ascii(b"a\0b").1, Some("text after its NUL"));
+        assert_eq!(
+            ascii(&[b'a', 0xFF]).1,
+            Some("text that isn't UTF-8, replaced")
+        );
+
+        // Through the file's values and a resource's tracking data.
+        let mut problems = Vec::new();
+        let read = values(&value(STRING, b"o\0k"), &mut problems);
+        assert_eq!(read[0].value, Value::Text("o".to_owned()));
+        assert_eq!(problems.len(), 1, "{problems:?}");
+        let mut pairs = pair("A", 6, &sized(b"o\0k"));
+        pairs.extend(pair("B", 7, &sized(&[b'a', 0xFF, 0])));
+        let mut data = ((pairs.len() + 4) as u32).to_le_bytes().to_vec();
+        data.extend(&pairs);
+        let mut problems = Vec::new();
+        let tracking = read_tracking(&data, &mut problems);
+        assert_eq!(tracking.len(), 2);
+        assert_eq!(problems.len(), 2, "{problems:?}");
     }
 
     #[test]

@@ -337,17 +337,23 @@ fn decode(data: &[u8], problems: &mut Vec<String>) -> String {
         || (data.len() >= 4 && data[1] == 0 && data[3] == 0 && data[0] != 0);
     if utf16 {
         let body = data.strip_prefix(&[0xFF, 0xFE]).unwrap_or(data);
-        let units: Vec<u16> = body
-            .chunks_exact(2)
-            .map(|p| u16::from_le_bytes([p[0], p[1]]))
-            .collect();
+        let pairs = body.chunks_exact(2);
+        if !pairs.remainder().is_empty() {
+            problems.push("an odd byte at the end (UTF-16 is in pairs), not read".to_owned());
+        }
+        let units: Vec<u16> = pairs.map(|p| u16::from_le_bytes([p[0], p[1]])).collect();
         String::from_utf16(&units).unwrap_or_else(|_| {
             problems.push("text that isn't valid UTF-16, replaced".to_owned());
             String::from_utf16_lossy(&units)
         })
     } else {
         let body = data.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(data);
-        String::from_utf8_lossy(body).into_owned()
+        if let Ok(text) = std::str::from_utf8(body) {
+            text.to_owned()
+        } else {
+            problems.push("text that isn't valid UTF-8, replaced".to_owned());
+            String::from_utf8_lossy(body).into_owned()
+        }
     }
 }
 

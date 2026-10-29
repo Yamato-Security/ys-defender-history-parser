@@ -661,22 +661,38 @@ fn read_tracking(data: &[u8], problems: &mut Vec<String>) -> Vec<(String, Value)
 }
 
 /// The pairs, read within the size the data declares (bytes past it are not evidence), and that
-/// size.
+/// size. Every size declared is checked against what is there: the header's own, the whole's
+/// (after the pairs, which are kept), and the pairs'.
 fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<usize, String> {
     let first = u32_at(data, 0).ok_or("shorter than 4 bytes")? as usize;
-    let (mut at, end) = if first == 1 {
-        let header = u32_at(data, 4).ok_or("a header cut short")? as usize;
-        let pairs = u32_at(data, 8).ok_or("a header cut short")? as usize;
-        if pairs == 0 {
-            return Ok(header.min(data.len()));
+    let (mut at, end, whole) = if first == 1 {
+        let cut = || format!("a header cut short ({} bytes)", data.len());
+        let header = u32_at(data, 4).ok_or_else(cut)? as usize;
+        let pairs = u32_at(data, 8).ok_or_else(cut)? as usize;
+        let whole = u32_at(data, 12).ok_or_else(cut)? as usize;
+        if header < 16 || header > data.len() {
+            return Err(format!("a header of {header} bytes in {}", data.len()));
         }
-        (header.saturating_add(4), header.saturating_add(pairs))
+        if pairs == 0 {
+            if whole != data.len() {
+                return Err(format!("{whole} bytes said, {} there", data.len()));
+            }
+            return Ok(header);
+        }
+        if pairs < 4 {
+            return Err(format!("pairs of {pairs} bytes, less than their size's 4"));
+        }
+        (header + 4, header.saturating_add(pairs), Some(whole))
     } else {
-        (4, first)
+        if first < 4 {
+            return Err(format!("{first} bytes said, less than the size's own 4"));
+        }
+        (4, first, None)
     };
     if end > data.len() {
         return Err(format!("{end} bytes said, {} there", data.len()));
     }
+    let all = data.len();
     let data = &data[..end];
     while at < end {
         let key_size = u32_at(data, at).ok_or("a key cut short")? as usize;
@@ -720,7 +736,10 @@ fn read_pairs(data: &[u8], tracking: &mut Vec<(String, Value)>) -> Result<usize,
         ));
         at += size;
     }
-    Ok(end)
+    match whole {
+        Some(whole) if whole != all => Err(format!("{whole} bytes said, {all} there")),
+        _ => Ok(end),
+    }
 }
 
 fn u32_at(data: &[u8], at: usize) -> Option<u32> {
@@ -864,6 +883,43 @@ mod tests {
 
         assert!(read_pairs(&data, &mut tracking).is_err(), "{tracking:?}");
         assert!(tracking.is_empty(), "{tracking:?}");
+    }
+
+    #[test]
+    fn empty_tracking_header_must_fit_in_the_blob() {
+        let mut data = Vec::new();
+        for n in [1u32, 0x14, 0] {
+            data.extend(n.to_le_bytes());
+        }
+        let mut problems = Vec::new();
+
+        assert_eq!(read_tracking(&data, &mut problems), []);
+        assert!(
+            !problems.is_empty(),
+            "a 20-byte header in a 12-byte blob was accepted"
+        );
+    }
+
+    #[test]
+    fn declared_sizes_are_checked() {
+        let words =
+            |words: &[u32]| -> Vec<u8> { words.iter().flat_map(|w| w.to_le_bytes()).collect() };
+        let read = |data: &[u8]| {
+            let mut problems = Vec::new();
+            (read_tracking(data, &mut problems), problems)
+        };
+        // A header smaller than the fields read, and a size smaller than itself.
+        assert_eq!(read(&words(&[1, 8, 0, 20, 0])).1.len(), 1);
+        assert_eq!(read(&words(&[2, 0])).1.len(), 1);
+        // A whole size that isn't the data's: the pairs are kept, with the problem.
+        let pairs = pair("A", 3, &1u32.to_le_bytes());
+        let mut inner = ((pairs.len() + 4) as u32).to_le_bytes().to_vec();
+        inner.extend(&pairs);
+        let mut data = words(&[1, 0x14, inner.len() as u32, 999, 0]);
+        data.extend(&inner);
+        let (tracking, problems) = read(&data);
+        assert_eq!(tracking, [("A".to_owned(), Value::Integer(1))]);
+        assert_eq!(problems.len(), 1, "{problems:?}");
     }
 
     #[test]

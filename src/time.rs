@@ -8,7 +8,7 @@ use std::fmt::{self, Write};
 const TICKS_PER_SECOND: i64 = 10_000_000;
 /// Days from 0001-01-01 (proleptic Gregorian) to 1601-01-01.
 const DAYS_TO_1601: i64 = 584_388;
-/// The last FILETIME of 9999-12-31, as .NET and Eric Zimmerman's tools allow.
+/// The last FILETIME of 9999-12-31, as .NET allows.
 const MAX_FILETIME: u64 = 2_650_467_743_999_999_999;
 
 /// How precisely a time was written.

@@ -24,6 +24,18 @@ fn bytes(relative: &str) -> Vec<u8> {
     std::fs::read(root().join(relative)).unwrap()
 }
 
+fn stream(kind: u32, attributes: u32, name: &str, data: &[u8]) -> Vec<u8> {
+    let name: Vec<u8> = name.encode_utf16().flat_map(u16::to_le_bytes).collect();
+    let mut out = Vec::new();
+    out.extend(kind.to_le_bytes());
+    out.extend(attributes.to_le_bytes());
+    out.extend((data.len() as u64).to_le_bytes());
+    out.extend((name.len() as u32).to_le_bytes());
+    out.extend(name);
+    out.extend(data);
+    out
+}
+
 fn entry(id: &str) -> Entry {
     let data = bytes(&format!("Entries/{{{id}}}"));
     assert!(detect(&data));
@@ -166,6 +178,78 @@ fn a_hive_and_an_orphan() {
     let orphan = read_resource_data(&bytes(&format!("ResourceData/{}/{ORPHAN}", &ORPHAN[..2])));
     assert_eq!(orphan.id, ORPHAN);
     assert_eq!(orphan.file_data(), Some(&b"left behind\r\n"[..]));
+}
+
+#[test]
+fn a_sparse_file_is_reconstructed_not_mistaken_for_an_empty_file() {
+    let mut plain = stream(1, 8, "", &[]);
+    let mut first = 4u64.to_le_bytes().to_vec();
+    first.extend(b"AB");
+    plain.extend(stream(9, 8, "", &first));
+    let mut second = 10u64.to_le_bytes().to_vec();
+    second.extend(b"XYZ");
+    plain.extend(stream(9, 8, "", &second));
+    // A sparse alternate stream and its block do not belong to the unnamed file stream.
+    plain.extend(stream(4, 8, ":sparse:$DATA", &[]));
+    let mut alternate = 0u64.to_le_bytes().to_vec();
+    alternate.extend(b"not the file");
+    plain.extend(stream(9, 8, "", &alternate));
+
+    let data = read_resource_data(&crypt(&plain));
+    assert_eq!(data.problems, Vec::<String>::new());
+    // Returning the empty DATA stream here used to give the empty file's hash and lose both
+    // allocated regions.
+    assert_eq!(data.file_data(), None);
+    let file = data.reconstruct_sparse_file(16).unwrap();
+    assert_eq!(file, b"\0\0\0\0AB\0\0\0\0XYZ\0\0\0");
+    assert_eq!(
+        hashes(&file).sha256,
+        "5dda0626b604ebe5cbbad0387090ce5dbe8a940de5ae0b34d1017952306a2fe3"
+    );
+    assert!(data.reconstruct_sparse_file(12).is_err());
+}
+
+#[test]
+fn damaged_sparse_blocks_and_stream_names_are_reported() {
+    let mut short = stream(1, 8, "", &[]);
+    short.extend(stream(9, 8, "", b"short"));
+    let short = read_resource_data(&crypt(&short));
+    assert!(short
+        .problems
+        .iter()
+        .any(|p| p.contains("8-byte file offset")));
+    assert!(short.reconstruct_sparse_file(10).is_err());
+
+    let mut overflow = stream(1, 8, "", &[]);
+    let mut block = u64::MAX.to_le_bytes().to_vec();
+    block.push(1);
+    overflow.extend(stream(9, 8, "", &block));
+    let overflow = read_resource_data(&crypt(&overflow));
+    assert!(overflow.problems.iter().any(|p| p.contains("overflow")));
+    assert!(overflow.reconstruct_sparse_file(10).is_err());
+
+    let named_data = read_resource_data(&crypt(&stream(1, 0, "not allowed", b"data")));
+    assert!(named_data
+        .problems
+        .iter()
+        .any(|p| p.contains("kind 1 with a name")));
+
+    // Even when the sparse attribute itself is damaged, do not present the empty base stream as
+    // the complete file. The block remains recoverable, alongside the reported inconsistency.
+    let mut missing_attribute = stream(1, 0, "", &[]);
+    let mut block = 2u64.to_le_bytes().to_vec();
+    block.extend(b"evidence");
+    missing_attribute.extend(stream(9, 8, "", &block));
+    let missing_attribute = read_resource_data(&crypt(&missing_attribute));
+    assert!(missing_attribute
+        .problems
+        .iter()
+        .any(|p| p.contains("without a preceding sparse data stream")));
+    assert_eq!(missing_attribute.file_data(), None);
+    assert_eq!(
+        missing_attribute.reconstruct_sparse_file(10).unwrap(),
+        b"\0\0evidence"
+    );
 }
 
 #[test]

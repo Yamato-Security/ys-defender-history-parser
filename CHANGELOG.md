@@ -80,8 +80,9 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
 - The quarantine (`quarantine` module): entries (`read_entry`: the threat, scan and time, and every
   resource with its fields), resource records (`read_resource_record`: the content's size and the
   entries holding it) and contents (`read_resource_data`: decrypted, a file's `BackupRead`
-  streams or a registry hive; `owner`, `zone_identifier`, `file_data`), with `crypt` (RC4 with
-  Defender's key), `detect` and `hashes`. Sizes, CRCs and the content's SHA-1 are checked.
+  streams or a registry hive; `owner`, `zone_identifier`, `file_data`), including sparse files
+  reconstructed from their blocks and logical size, with `crypt` (RC4 with Defender's key),
+  `detect` and `hashes`. Sizes, CRCs and the content's SHA-1 are checked.
 - `sootmark-common` is a dependency again, for CRC-32, MD5, SHA-1 and SHA-256.
 
 ### Tests

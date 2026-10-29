@@ -149,8 +149,10 @@ its own:
   or a service's), and its identifier is the SHA-1 of it decrypted.
 
 The sizes, both CRCs and the SHA-1 are checked: a part cut short, changed or damaged is reported.
-`read_resource_data` keeps the content in memory to read it; `file_data` is what was quarantined,
-`hashes` its MD5, SHA-1 and SHA-256 (as the detection history's tracking data gives a file's).
+`read_resource_data` keeps the content in memory to read it; `file_data` is what was quarantined
+for an ordinary file. A sparse file is reconstructed from its allocated blocks with
+`reconstruct_sparse_file` and the `FileSize` in its entry, preserving zero regions. `hashes` gives
+the recovered file's MD5, SHA-1 and SHA-256 (as the detection history's tracking data does).
 
 ## Credits
 

@@ -542,6 +542,9 @@ pub struct ResourceData {
 
 /// The size of a stream's header (kind, attributes, size, name's size).
 const STREAM_HEADER: usize = 20;
+/// A data or alternate-data stream is sparse; its allocated regions follow in sparse-block
+/// streams.
+const STREAM_SPARSE_ATTRIBUTE: u32 = 0x08;
 
 /// Read a resource's content (`ResourceData\<xx>\<ID>`): decrypted, a file's streams found, or a
 /// registry hive. Check [`ResourceData::id`] against the file's name.
@@ -584,6 +587,17 @@ pub fn read_resource_data(data: &[u8]) -> ResourceData {
             ));
             break;
         };
+        if kind == 4 {
+            if name_size > 65_536 {
+                read.problems.push(format!(
+                    "offset {at:#x}: an alternate stream name of {name_size} bytes, more than 65536"
+                ));
+            }
+        } else if name_size != 0 {
+            read.problems.push(format!(
+                "offset {at:#x}: a stream of kind {kind} with a name of {name_size} bytes"
+            ));
+        }
         let (name, damage) = utf16(name);
         if let Some(damage) = damage {
             read.problems
@@ -598,6 +612,31 @@ pub fn read_resource_data(data: &[u8]) -> ResourceData {
         at = data_end;
     }
     read.content = content;
+    for (i, stream) in read.streams.iter().enumerate().filter(|(_, s)| s.kind == 9) {
+        let data = read.stream_data(stream);
+        if data.len() < 8 {
+            read.problems.push(format!(
+                "stream {i}: a sparse block shorter than its 8-byte file offset"
+            ));
+            continue;
+        }
+        let offset = u64_at(data, 0).unwrap_or(0);
+        let length = u64::try_from(data.len() - 8).unwrap_or(u64::MAX);
+        if offset.checked_add(length).is_none() {
+            read.problems.push(format!(
+                "stream {i}: a sparse block whose offset and size overflow"
+            ));
+        }
+        let parent = read.streams[..i]
+            .iter()
+            .rev()
+            .find(|s| matches!(s.kind, 1 | 4));
+        if parent.map_or(true, |s| s.attributes & STREAM_SPARSE_ATTRIBUTE == 0) {
+            read.problems.push(format!(
+                "stream {i}: a sparse block without a preceding sparse data stream"
+            ));
+        }
+    }
     read
 }
 
@@ -608,14 +647,99 @@ impl ResourceData {
         self.content.get(stream.range.clone()).unwrap_or_default()
     }
 
-    /// What was quarantined: a file's data (its first data stream), or a hive.
+    /// What was quarantined: a non-sparse file's data (its first data stream), or a hive.
+    ///
+    /// A sparse file is not one contiguous borrowed range: this returns `None` for it. Use
+    /// [`ResourceData::reconstruct_sparse_file`] with the file size from its entry instead.
     #[must_use]
     pub fn file_data(&self) -> Option<&[u8]> {
         if self.hive {
             return Some(&self.content);
         }
-        let data = self.streams.iter().find(|s| s.kind == 1)?;
+        let (data_i, data) = self
+            .streams
+            .iter()
+            .enumerate()
+            .find(|(_, stream)| stream.kind == 1)?;
+        if data.attributes & STREAM_SPARSE_ATTRIBUTE != 0
+            || self.streams[data_i + 1..]
+                .iter()
+                .take_while(|stream| !matches!(stream.kind, 1 | 4))
+                .any(|stream| stream.kind == 9)
+        {
+            return None;
+        }
         Some(self.stream_data(data))
+    }
+
+    /// Reconstruct a sparse file's unnamed data stream, including its zero regions.
+    ///
+    /// `size` is the logical file size from the quarantine entry's `FileSize` field. A sparse
+    /// block starts with its 8-byte file offset; the bytes after it are placed there. Blocks after
+    /// an alternate-data stream belong to that named stream, not to the file's unnamed stream.
+    ///
+    /// # Errors
+    /// When the content has no sparse data stream, a block is malformed or falls outside `size`,
+    /// or a buffer of `size` bytes cannot be represented or reserved.
+    pub fn reconstruct_sparse_file(&self, size: u64) -> Result<Vec<u8>, Error> {
+        if self.hive {
+            return Err(Error("a registry hive is not a sparse file".to_owned()));
+        }
+        let Some((data_i, data)) = self
+            .streams
+            .iter()
+            .enumerate()
+            .find(|(_, stream)| stream.kind == 1)
+        else {
+            return Err(Error("no data stream".to_owned()));
+        };
+        let has_blocks = self.streams[data_i + 1..]
+            .iter()
+            .take_while(|stream| !matches!(stream.kind, 1 | 4))
+            .any(|stream| stream.kind == 9);
+        if data.attributes & STREAM_SPARSE_ATTRIBUTE == 0 && !has_blocks {
+            return Err(Error("the data stream is not sparse".to_owned()));
+        }
+        let size = usize::try_from(size)
+            .map_err(|_| Error("the sparse file's size does not fit in memory".to_owned()))?;
+        let base = self.stream_data(data);
+        if base.len() > size {
+            return Err(Error(format!(
+                "the data stream has {} bytes, more than the file's {size}",
+                base.len()
+            )));
+        }
+        let mut file = Vec::new();
+        file.try_reserve_exact(size)
+            .map_err(|_| Error(format!("could not reserve the sparse file's {size} bytes")))?;
+        file.resize(size, 0);
+        file[..base.len()].copy_from_slice(base);
+
+        for (i, stream) in self.streams[data_i + 1..].iter().enumerate() {
+            if matches!(stream.kind, 1 | 4) {
+                break;
+            }
+            if stream.kind != 9 {
+                continue;
+            }
+            let n = data_i + 1 + i;
+            let block = self.stream_data(stream);
+            let offset = u64_at(block, 0)
+                .ok_or_else(|| Error(format!("stream {n}: a sparse block without its offset")))?;
+            let offset = usize::try_from(offset)
+                .map_err(|_| Error(format!("stream {n}: a sparse block offset too large")))?;
+            let bytes = &block[8..];
+            let end = offset
+                .checked_add(bytes.len())
+                .filter(|&end| end <= size)
+                .ok_or_else(|| {
+                    Error(format!(
+                        "stream {n}: a sparse block outside the file's {size} bytes"
+                    ))
+                })?;
+            file[offset..end].copy_from_slice(bytes);
+        }
+        Ok(file)
     }
 
     /// The file's owner (a SID, `S-1-5-21-…`), from its security descriptor.

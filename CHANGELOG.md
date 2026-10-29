@@ -33,6 +33,8 @@ First version of Yamato Security's fork of sootmark-defender 0.2.0 (Sootmark/def
   data's, a size smaller than itself.
 - Damaged text in strings, tracking keys and values was read without a problem: an odd byte
   dropped, text after the NUL ignored, invalid UTF-16 or UTF-8 replaced. Each is now reported.
+- A file cut inside its last value's padding read as whole; padding cut short is now reported, and
+  padding that isn't zero too.
 - Files without `Magic.Version:1.2` (Windows Server 2016's, as Orange Cyberdefense found) were
   refused: a file is recognised by its first values (a threat identifier, a GUID, a string).
 

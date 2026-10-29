@@ -1,4 +1,4 @@
-//! Any input gives a detection, problems or an error, never a panic.
+//! Any input gives a detection, problems or an error, never a panic; damage is reported.
 
 use proptest::prelude::*;
 
@@ -9,6 +9,25 @@ fn real() -> Vec<u8> {
     std::io::Read::read_to_end(&mut common::gzip::Decoder::new(&compressed[..]), &mut data)
         .unwrap();
     data
+}
+
+#[test]
+fn final_value_padding_cut_short_is_reported() {
+    let mut data = include_bytes!(
+        "fixtures/museum/apt-simulator-vm/DetectionHistory/00/\
+         513F108E-C674-4D19-AE23-79C9AD68A0E6"
+    )
+    .to_vec();
+    assert_eq!(data.len(), 10_296);
+    assert_eq!(
+        defender::read(&data).unwrap().problems,
+        Vec::<String>::new()
+    );
+
+    data.pop(); // remove one byte from the final 64-bit alignment padding
+    let detection = defender::read(&data).unwrap();
+    assert_eq!(detection.problems.len(), 1, "{:?}", detection.problems);
+    assert!(detection.problems[0].contains("padding cut short"));
 }
 
 proptest! {

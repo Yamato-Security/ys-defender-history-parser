@@ -421,7 +421,23 @@ fn values(data: &[u8], problems: &mut Vec<String>) -> Vec<Raw> {
             _ => Value::Bytes(bytes.to_vec()),
         };
         values.push(Raw { at, kind, value });
-        at = (at + 8 + size).next_multiple_of(8);
+        // Zero padding to 8 bytes follows every value, the last included.
+        let (end, next) = (at + 8 + size, (at + 8 + size).next_multiple_of(8));
+        match data.get(end..next) {
+            None => {
+                problems.push(format!(
+                    "offset {at:#x}: its padding cut short ({} of {} bytes)",
+                    data.len() - end,
+                    next - end
+                ));
+                break;
+            }
+            Some(padding) if padding.iter().any(|&b| b != 0) => {
+                problems.push(format!("offset {end:#x}: padding that isn't zero"));
+            }
+            Some(_) => {}
+        }
+        at = next;
     }
     values
 }
@@ -843,6 +859,23 @@ mod tests {
             .encode_utf16()
             .flat_map(u16::to_le_bytes)
             .collect()
+    }
+
+    #[test]
+    fn padding_cut_short_or_not_zero_is_reported() {
+        let full = value(STRING, &text("ab"));
+        let mut problems = Vec::new();
+        let read = values(&full[..full.len() - 1], &mut problems);
+        assert_eq!(read[0].value, Value::Text("ab".to_owned()));
+        assert_eq!(
+            problems,
+            ["offset 0x0: its padding cut short (1 of 2 bytes)"]
+        );
+        let mut dirty = full.clone();
+        *dirty.last_mut().unwrap() = 1;
+        let mut problems = Vec::new();
+        values(&dirty, &mut problems);
+        assert_eq!(problems, ["offset 0xe: padding that isn't zero"]);
     }
 
     #[test]

@@ -3,6 +3,11 @@
 ## 1.0.0 (Unreleased)
 
 ### Changed
+- License: ys-defender-history-parser is now copyright Shirofune Security Co., Ltd. and released
+  under the Reciprocal Public License 1.5 (RPL-1.5) instead of MIT OR Apache-2.0. Upstream's code
+  stays under MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`). Every Rust file carries the
+  copyright and the RPL License Notice; those changed from upstream also name it, with its copyright
+  and license. (@YamatoSecurity)
 - The crate is named after its repository, `ys-defender-history-parser` (its library is still
   `defender`: depend on it as `defender = { package = "ys-defender-history-parser", … }`), version
   1.0.0, by Florian Amette and Zach Mathis (@yamatosecurity), on Rust's 2024 edition, and requires

@@ -20,11 +20,11 @@ crate (Florian Amette): Microsoft Defender's on-disk evidence, for forensics, fo
   and alternate data streams (`Zone.Identifier`: where it was downloaded from), or a registry
   hive. Nothing is ever run.
 
-Upstream's history is kept, with its MIT OR Apache-2.0 license. The crate is named after the
-repository, `ys-defender-history-parser` (upstream's was `sootmark-defender`), and keeps its library
-name, `defender`. It is version 1.0.0, by Florian Amette and Zach Mathis (@yamatosecurity), on
-Rust's 2024 edition, requires Rust 1.99, and is not published. One dependency, Sootmark's
-`sootmark-common` (CRC-32, MD5, SHA-1, SHA-256).
+Upstream's history is kept, and its code stays under its MIT OR Apache-2.0 license (see
+[Licence](#licence)). The crate is named after the repository, `ys-defender-history-parser`
+(upstream's was `sootmark-defender`), and keeps its library name, `defender`. It is version 1.0.0,
+by Florian Amette and Zach Mathis (@yamatosecurity), on Rust's 2024 edition, requires Rust 1.99, and
+is not published. One dependency, Sootmark's `sootmark-common` (CRC-32, MD5, SHA-1, SHA-256).
 
 ## Why this crate
 
@@ -185,6 +185,11 @@ signatures and other log lines not listed above are left out.
 
 ## Licence
 
-MIT or Apache-2.0, at your option (`LICENSE-MIT`, `LICENSE-APACHE`). The test files keep their
-licences: plaso's and Orange Cyberdefense's (Apache-2.0) and DFIRArtifactMuseum's (MIT), each with
-its licence beside it. wddh, Intrinsec's parser, DLEAPP and DHParser were only run, never included.
+ys-defender-history-parser is copyright Shirofune Security Co., Ltd. and released under the
+[Reciprocal Public License 1.5](LICENSE) (RPL-1.5); its source code was published under MIT OR
+Apache-2.0 before version 1.0.0. It is changed from
+[Sootmark/defender](https://github.com/Sootmark/defender) (copyright Cyber Experts), whose code
+stays under the MIT License or the Apache License 2.0 (`LICENSE-MIT`, `LICENSE-APACHE`): each Rust
+file changed from it says so in its header. The test files keep their licences: plaso's and Orange
+Cyberdefense's (Apache-2.0) and DFIRArtifactMuseum's (MIT), each with its licence beside it. wddh,
+Intrinsec's parser, DLEAPP and DHParser were only run, never included.

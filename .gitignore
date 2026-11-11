@@ -2,3 +2,6 @@
 .DS_Store
 # Local files, never committed.
 /tests/fixtures-real/
+
+# Local environment files may contain secrets.
+.env

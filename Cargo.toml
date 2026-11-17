@@ -10,7 +10,6 @@ rust-version = "1.99"
 description = "Microsoft Defender for forensics: its detection history files (the threat, its status and what was done, where it was found with hashes and times, the user, process, detection source and quarantine entry) and its protection and detection logs (MPLog, MPDetection: detections, programs scanned, exclusions, telemetry, service starts and versions)."
 license = "RPL-1.5 AND (MIT OR Apache-2.0)"
 repository = "https://github.com/Yamato-Security/ys-defender-history-parser"
-homepage = "https://github.com/Yamato-Security/ys-defender-history-parser"
 keywords = ["forensics", "dfir", "incident-response", "windows", "defender"]
 # Sources only: test fixtures stay in the repository.
 include = ["/src", "/README.md", "/LICENSE-APACHE", "/LICENSE-MIT"]
@@ -24,7 +23,7 @@ name = "defender"
 common = { package = "sootmark-common", version = "0.3.7" }
 
 [dev-dependencies]
-proptest = "1"
+proptest = "1.12.0"
 
 [lints.rust]
 unsafe_code = "forbid"

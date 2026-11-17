@@ -183,6 +183,16 @@ detection files of the newest Defender versions: a Windows 11 machine's files wi
 `Get-MpThreatDetection`'s output beside them would settle what the unknown values mean. Dynamic
 signatures and other log lines not listed above are left out.
 
+## Contributing
+
+Contributions require this repository's [Contributor License Agreement](CLA.md).
+It permits **Zachary Mathis** and **Shirofune Security Co., Ltd.** to use and
+sell covered contributions in proprietary editions, while accepted contributions
+also remain available in the free, open-source community edition.
+Read [how to sign](CONTRIBUTING.md#how-to-sign). The `cla/required` check uses
+the [maintainer-verified signer registry](.github/cla/signatures.json); first-time
+signatures require verification and registration.
+
 ## Licence
 
 ys-defender-history-parser is copyright Shirofune Security Co., Ltd. and released under the
